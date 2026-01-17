@@ -1,23 +1,33 @@
 // =================================================================
 // 設定
 // =================================================================
+// ★前回のまま、あなたのGASウェブアプリURLを貼り付けてください
 const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwtRjHytAQqgge6pvM_eLcgTHPPlDVIbG0ujxGGVvJg884pMsMM_qXIiw0Gn1y4Z7EzuA/exec'; 
-let currentToken = ""; // トークンを保持しておく変数
+
+let currentToken = ""; // トークン保持用
 
 // =================================================================
-// アプリ開始
+// アプリケーション開始処理
 // =================================================================
 window.startApp = function(token) {
-    currentToken = token; // トークンを保存
+    console.log("アプリ開始: トークン取得済み");
+    currentToken = token; 
     initDate();
     initMenu();
-    // 初期表示は「経営数値(sales)」
+    // 初期表示
     fetchData('getSales'); 
 };
 
 // =================================================================
-// メニュー制御
+// 画面初期化・メニュー制御
 // =================================================================
+function initDate() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+    const dateElem = document.getElementById('current-date');
+    if(dateElem) dateElem.textContent = now.toLocaleDateString('ja-JP', options);
+}
+
 function initMenu() {
     const menuItems = document.querySelectorAll('.menu-item');
     const pageTitle = document.getElementById('page-title');
@@ -26,41 +36,35 @@ function initMenu() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // アクティブ切り替え
+            // アクティブ表示の切り替え
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             
-            // タイトル変更
-            const target = item.dataset.target; // htmlの data-target="..."
-            const text = item.querySelector('span').textContent;
+            // ★修正箇所: <a>タグから正しく情報を取得する
+            const link = item.querySelector('a');
+            const target = link.dataset.target; // ここが修正ポイント
+            const text = link.querySelector('span').textContent;
+            
             if(pageTitle) pageTitle.textContent = text + ' ダッシュボード';
 
-            // ★画面切り替えロジック
+            // 画面切り替えロジック
             if (target === 'phr') {
-                // PHRデータの取得へ
-                fetchData('getPhr');
+                fetchData('getPhr');       // PHRデータ取得へ
             } else if (target === 'dashboard') {
-                // 売上データの取得へ
-                fetchData('getSales');
+                fetchData('getSales');     // 売上データ取得へ
             } else {
-                // まだ未実装のページ
                 alert('この機能は開発中です');
             }
         });
     });
 }
 
-function initDate() {
-    const now = new Date();
-    document.getElementById('current-date').textContent = now.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-}
-
 // =================================================================
-// データ取得 (共通)
+// データ取得 (API通信)
 // =================================================================
 async function fetchData(actionType) {
     if (!currentToken) return;
-    
+
     // ローディング表示
     const loadingElem = document.getElementById('loading');
     if(loadingElem) {
@@ -69,27 +73,30 @@ async function fetchData(actionType) {
     }
 
     try {
+        console.log(`GASへデータ要求送信 (${actionType})...`);
+
         const response = await fetch(GAS_API_URL, {
             method: "POST",
             mode: "cors",
             redirect: "follow",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            // ★変更点: actionタイプ（getSales または getPhr）を送信
             body: JSON.stringify({ 
                 token: currentToken,
                 action: actionType 
             })
         });
 
-        if (!response.ok) throw new Error('Network error');
+        if (!response.ok) throw new Error('Network response was not ok');
         const jsonData = await response.json();
 
         if (jsonData.error) {
-            alert("Error: " + jsonData.message);
+            console.error("Server Error:", jsonData);
+            alert(`エラー: ${jsonData.message}`);
+            if(loadingElem) loadingElem.textContent = 'エラー: ' + jsonData.message;
             return;
         }
 
-        // ★分岐: 取得したデータの種類に応じて描画関数を変える
+        // 取得したデータに応じて描画処理を分岐
         if (actionType === 'getPhr') {
             renderPhrDashboard(jsonData);
         } else {
@@ -97,8 +104,8 @@ async function fetchData(actionType) {
         }
 
     } catch (error) {
-        console.error(error);
-        if(loadingElem) loadingElem.textContent = 'データ取得エラー';
+        console.error('Fetch Error:', error);
+        if(loadingElem) loadingElem.textContent = '通信エラーが発生しました。';
     }
 }
 
@@ -109,22 +116,23 @@ function renderSalesDashboard(data) {
     const loadingElem = document.getElementById('loading');
     if(loadingElem) loadingElem.style.display = 'none';
 
-    // カード表示エリア（KPI）の更新は省略または必要に応じて実装
-    // ここではグラフの更新のみ行います
-
+    // グラフ描画
     const canvas = document.getElementById('salesChart');
     if (!canvas) return;
 
-    // 既存チャート破棄
     const chartStatus = Chart.getChart(canvas);
     if (chartStatus) chartStatus.destroy();
-
-    const labels = data.map(item => item.date);
     
+    // データが空の場合のガード
+    if (!data || data.length === 0) {
+        // 空のグラフなどを表示しても良いが、今回はそのまま
+        return;
+    }
+
     new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: data.map(item => item.date),
             datasets: [
                 {
                     label: '自費売上 (円)',
@@ -137,6 +145,7 @@ function renderSalesDashboard(data) {
                     data: data.map(item => item.insurancePoints),
                     type: 'line',
                     borderColor: 'rgba(245, 158, 11, 1)',
+                    borderWidth: 3,
                     tension: 0.3,
                     yAxisID: 'y1'
                 }
@@ -154,79 +163,61 @@ function renderSalesDashboard(data) {
 }
 
 // =================================================================
-// 描画: PHR (修正版)
+// 描画: PHR (PHRアプリ連携)
 // =================================================================
 function renderPhrDashboard(data) {
     const loadingElem = document.getElementById('loading');
     if(loadingElem) loadingElem.style.display = 'none';
 
-    // 1. サマリー情報の表示（KPIカードの数値を上書きする演出）
-    // 実際のKPIカードIDに合わせて適宜調整してください
+    // 1. KPIカードの数値をPHR仕様に一時的に書き換え
     const summary = data.summary;
     const dailyData = data.dailyActivity;
 
-    // 例: 売上エリアなどを一時的にPHR情報に書き換え（デモ用）
-    const cardSales = document.getElementById('kpi-sales');
-    if(cardSales) {
-        // カードのラベルを変えたい場合は親要素を操作する必要がありますが、ここでは数値のみ
-        cardSales.textContent = summary.totalUsers.toLocaleString(); 
-        // 単位などを変える処理が必要ならここに記述
-        // cardSales.parentElement.querySelector('h3').textContent = 'PHR登録患者数';
+    if (summary) {
+        const cardSales = document.getElementById('kpi-sales');
+        // 例: 売上エリアに「登録患者数」を表示
+        if(cardSales) cardSales.textContent = summary.totalUsers ? summary.totalUsers.toLocaleString() : "0";
+
+        const cardVisitors = document.getElementById('kpi-visitors');
+        // 例: 来院数エリアに「診断ログ数」を表示
+        if(cardVisitors) cardVisitors.textContent = summary.totalDiagnoses ? summary.totalDiagnoses.toLocaleString() : "0";
     }
 
-    const cardVisitors = document.getElementById('kpi-visitors');
-    if(cardVisitors) {
-        cardVisitors.textContent = summary.totalDiagnoses.toLocaleString();
-        // cardVisitors.parentElement.querySelector('h3').textContent = '診断ログ総数';
-    }
-
-
-    // 2. グラフの描画 (daily_logsの推移)
+    // 2. グラフ描画
     const canvas = document.getElementById('salesChart');
     if (!canvas) return;
 
     const chartStatus = Chart.getChart(canvas);
     if (chartStatus) chartStatus.destroy();
 
-    // 日付ラベルとデータ
+    // 日付と記録数
     const labels = dailyData.map(item => item.date);
-    const logCounts = dailyData.map(item => item.count);
+    const counts = dailyData.map(item => item.count);
 
     new Chart(canvas, {
-        type: 'line', // 推移を見るため折れ線に変更
+        type: 'line',
         data: {
             labels: labels,
             datasets: [
                 {
-                    label: 'PHR記録アクション数 (daily_logs)',
-                    data: logCounts,
-                    borderColor: 'rgba(59, 130, 246, 1)', // 青
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    label: 'PHR記録アクション数',
+                    data: counts,
+                    borderColor: '#10b981', // 緑色
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 3,
                     fill: true,
-                    tension: 0.4 // 曲線にする
+                    tension: 0.4
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
             plugins: {
-                title: { display: true, text: '日別 患者PHR利用アクティビティ' },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
-                }
+                title: { display: true, text: '日別 PHR利用アクティビティ' }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: '記録数 (件)' }
-                }
+                y: { beginAtZero: true }
             }
         }
     });
