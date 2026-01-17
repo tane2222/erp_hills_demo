@@ -1,63 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeCMo - Dental Clinic's Module Soft</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
 <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#f3f4f6; z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column;">
     <div style="background:white; padding:40px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); text-align:center; max-width:400px; width:90%;">
         <div style="font-size:40px; color:#3b82f6; margin-bottom:10px;"><i class="fa-solid fa-tooth"></i></div>
-        <h2 style="margin-bottom:10px; color:#1e293b;">DeCMo（デクモ）</h2>
-        <p style="color:#64748b; margin-bottom:30px;">Dental Clinic's Module Soft</p>
-        <button id="login-btn" style="background:#3b82f6; color:white; border:none; padding:12px 24px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:16px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;">
+        <h2 style="margin-bottom:10px; color:#1e293b;">DeCMo</h2>
+        <span style="font-size: 12px; color: #64748b; display: block; margin-bottom: 20px;">(デクモ) Dental Clinic's Module Soft</span>
+        
+        <button id="login-btn" style="background:#3b82f6; color:white; border:none; padding:12px 24px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:16px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; transition: opacity 0.2s;">
             <i class="fa-brands fa-google"></i> Googleでログイン
         </button>
         <p id="login-error" style="color:red; font-size:12px; margin-top:15px; display:none;"></p>
     </div>
 </div>
 
-<div class="app-container"> ... </div>
+<div class="app-container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"><i class="fa-solid fa-tooth"></i></div>
+            <div>
+                <h1 class="logo-text">DeCMo</h1>
+                <span style="font-size: 10px; color: var(--text-sub); display: block; line-height: 1;">(デクモ)</span>
+            </div>
+        </div>
+
+        <ul class="menu-list">
+            <li class="menu-item active">
+                <a href="#" data-target="dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>経営数値</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="phr">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>患者PHRアプリ連携</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="marketing">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>集患 (広告)</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="engagement">
+                    <i class="fa-solid fa-people-roof"></i>
+                    <span>エンゲージメント</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="recruitment">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>採用分析</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="satisfaction">
+                    <i class="fa-regular fa-face-smile"></i>
+                    <span>患者満足 (リピート)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-details">
+                    <span class="user-name">ゲスト</span>
+                    <span class="user-role">管理者</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 id="page-title">経営数値ダッシュボード</h2>
+            <div class="date-display" id="current-date">---</div>
+        </header>
+
+        <div class="content-body">
+            
+            <div class="kpi-grid">
+                <div class="card kpi-card">
+                    <div class="card-icon blue"><i class="fa-solid fa-yen-sign"></i></div>
+                    <div class="card-info">
+                        <h3>月次売上 (自費)</h3>
+                        <p class="value">¥<span id="kpi-sales">---</span></p>
+                        <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 集計中</span>
+                    </div>
+                </div>
+                
+                <div class="card kpi-card">
+                    <div class="card-icon green"><i class="fa-solid fa-users"></i></div>
+                    <div class="card-info">
+                        <h3>来院患者数</h3>
+                        <p class="value"><span id="kpi-visitors">---</span>名</p>
+                        <span class="trend flat"><i class="fa-solid fa-minus"></i> ---</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="card-icon orange"><i class="fa-solid fa-ban"></i></div>
+                    <div class="card-info">
+                        <h3>キャンセル率</h3>
+                        <p class="value">3.2%</p>
+                        <span class="trend down"><i class="fa-solid fa-arrow-trend-down"></i> 改善傾向</span>
+                    </div>
+                </div>
+                
+                 <div class="card kpi-card">
+                    <div class="card-icon purple"><i class="fa-solid fa-star"></i></div>
+                    <div class="card-info">
+                        <h3>自費率</h3>
+                        <p class="value">45%</p>
+                        <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 目標達成</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="card chart-card wide">
+                    <div class="card-header">
+                        <h3>売上・来院数 推移</h3>
+                        <div id="loading" class="loading-msg">データを取得中...</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-message-area">
+                <div class="card ai-card">
+                    <div class="ai-header">
+                        <i class="fa-solid fa-robot"></i> AIからのメッセージ
+                    </div>
+                    <div class="ai-body">
+                        <p><strong>分析:</strong> ようこそ DeCMo へ。現在データを分析中です。</p>
+                        <p><strong>提案:</strong> PHRアプリ連携を確認するにはサイドバーを選択してください。</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="script.js"></script>
 
 <script type="module">
   // Firebase SDKのインポート
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-  // ★ Step 1で取得したFirebase構成オブジェクトをここに貼り付けてください
-  const firebaseConfig = {
-  apiKey: "AIzaSyCPWYzP72y42Kle1Q-MDQjUdlnPlDyifxc",
-  authDomain: "decmo-hills--demo.firebaseapp.com",
-  projectId: "decmo-hills--demo",
-  storageBucket: "decmo-hills--demo.firebasestorage.app",
-  messagingSenderId: "166692708725",
-  appId: "1:166692708725:web:dc13314d3b98216f12733c",
-  measurementId: "G-TJPQT3H28R"
-};
-
-  // Firebase初期化
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-
-  // ログインボタンの処理
-  document.getElementById('login-btn').addEventListener('click', () => {
-    signInWithPopup(auth, provider)
-      .catch((error) => {
-        document.getElementById('login-error').textContent = "ログインに失敗しました: " + error.message;
-        document.getElementById('login-error').style.display = 'block';
-      });
-  });
-
-  // 認証状態の監視
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // ログイン成功時
-      document.getElementById('login-overlay').style.display = 'none';
-      
-      // ユーザー情報をUIに反映
-      document.querySelector('.user-name').textContent = user.displayName;
-      
-      // トークンを取得してデータ取得処理を開始
-      const token = await user.getIdToken();
-      window.startApp(token); // script.js内の関数を呼び出す
-      
-    } else {
-      // 未ログイン時
-      document.getElementById('login-overlay').style.display = 'flex';
-    }
-  });
-</script>
+  import { initializeApp } from "
