@@ -3,105 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歯科医院ERP ダッシュボード (Prototype)</title>
+    <title>Dental ERP System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
-        .dashboard-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        canvas { width: 100%; height: 400px; }
-        .loading { text-align: center; color: #666; margin-top: 20px; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="dashboard-container">
-    <h2>経営数値ダッシュボード</h2>
-    <div id="loading" class="loading">データを取得中...</div>
-    <canvas id="salesChart" style="display:none;"></canvas>
+<div class="app-container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"><i class="fa-solid fa-tooth"></i></div>
+            <h1 class="logo-text">Dental ERP</h1>
+        </div>
+
+        <ul class="menu-list">
+            <li class="menu-item active">
+                <a href="#" data-target="dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>経営数値</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="phr">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>患者PHRアプリ連携</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="marketing">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>集患 (広告)</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="engagement">
+                    <i class="fa-solid fa-people-roof"></i>
+                    <span>エンゲージメント</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="recruitment">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>採用分析</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" data-target="satisfaction">
+                    <i class="fa-regular fa-face-smile"></i>
+                    <span>患者満足 (リピート)</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-details">
+                    <span class="user-name">管理者</span>
+                    <span class="user-role">院長</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 id="page-title">経営数値ダッシュボード</h2>
+            <div class="date-display" id="current-date">2024年1月1日</div>
+        </header>
+
+        <div class="content-body">
+            
+            <div class="kpi-grid">
+                <div class="card kpi-card">
+                    <div class="card-icon blue"><i class="fa-solid fa-yen-sign"></i></div>
+                    <div class="card-info">
+                        <h3>月次売上 (予測)</h3>
+                        <p class="value">¥<span id="kpi-sales">---</span></p>
+                        <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 前月比 +5%</span>
+                    </div>
+                </div>
+                
+                <div class="card kpi-card">
+                    <div class="card-icon green"><i class="fa-solid fa-users"></i></div>
+                    <div class="card-info">
+                        <h3>来院患者数</h3>
+                        <p class="value"><span id="kpi-visitors">---</span>名</p>
+                        <span class="trend flat"><i class="fa-solid fa-minus"></i> 前日比 ±0</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card">
+                    <div class="card-icon orange"><i class="fa-solid fa-ban"></i></div>
+                    <div class="card-info">
+                        <h3>キャンセル率</h3>
+                        <p class="value">3.2%</p>
+                        <span class="trend down"><i class="fa-solid fa-arrow-trend-down"></i> 改善傾向</span>
+                    </div>
+                </div>
+                
+                 <div class="card kpi-card">
+                    <div class="card-icon purple"><i class="fa-solid fa-star"></i></div>
+                    <div class="card-info">
+                        <h3>自費率</h3>
+                        <p class="value">45%</p>
+                        <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 目標達成</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="card chart-card wide">
+                    <div class="card-header">
+                        <h3>売上・来院数 推移</h3>
+                        <div id="loading" class="loading-msg">データを取得中...</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-message-area">
+                <div class="card ai-card">
+                    <div class="ai-header">
+                        <i class="fa-solid fa-robot"></i> AIからのメッセージ
+                    </div>
+                    <div class="ai-body">
+                        <p><strong>分析:</strong> 今月の自費率は目標を上回っています。特にホワイトニングの予約が増加傾向です。</p>
+                        <p><strong>提案:</strong> キャンセル率が低い患者様へのリコール送信を推奨します。</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
 </div>
 
-<script>
-    // 【ここにGASのウェブアプリURLを貼り付けてください】
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwtRjHytAQqgge6pvM_eLcgTHPPlDVIbG0ujxGGVvJg884pMsMM_qXIiw0Gn1y4Z7EzuA/exec';
-
-    async function fetchData() {
-        try {
-            // GASへリクエスト（redirect: "follow" が重要です）
-            const response = await fetch(GAS_API_URL, {
-                method: "GET",
-                mode: "cors",
-                redirect: "follow" 
-            });
-
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const jsonData = await response.json();
-            renderChart(jsonData);
-
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('loading').textContent = 'データの取得に失敗しました。コンソールを確認してください。';
-        }
-    }
-
-    function renderChart(data) {
-        document.getElementById('loading').style.display = 'none';
-        const canvas = document.getElementById('salesChart');
-        canvas.style.display = 'block';
-
-        // データの加工
-        const labels = data.map(item => item.date);
-        const insuranceData = data.map(item => item.insurancePoints);
-        const selfPayData = data.map(item => item.selfPay);
-
-        new Chart(canvas, {
-            type: 'bar', // 棒グラフと折れ線の複合グラフ
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: '自費売上 (円)',
-                        data: selfPayData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: '保険点数 (点)',
-                        data: insuranceData,
-                        type: 'line', // 折れ線
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 2,
-                        fill: false,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                interaction: { mode: 'index', intersect: false },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: { display: true, text: '自費売上' }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: { display: true, text: '保険点数' },
-                        grid: { drawOnChartArea: false }
-                    }
-                }
-            }
-        });
-    }
-
-    // ページ読み込み時に実行
-    fetchData();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
