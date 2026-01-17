@@ -2,7 +2,7 @@
 // 設定
 // =================================================================
 
-// ★ここにGASのウェブアプリURLを貼り付けてください
+// ★重要：ここにあなたのGASウェブアプリURLを貼り付けてください
 const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwtRjHytAQqgge6pvM_eLcgTHPPlDVIbG0ujxGGVvJg884pMsMM_qXIiw0Gn1y4Z7EzuA/exec'; 
 
 
