@@ -1,229 +1,107 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Dental Health Check</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歯科医院ERP ダッシュボード (Prototype)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .dashboard-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        canvas { width: 100%; height: 400px; }
+        .loading { text-align: center; color: #666; margin-top: 20px; }
+    </style>
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="logo">DENTAL CHECK</div>
-    <div class="sub-logo">Official Report</div>
-  </header>
+<div class="dashboard-container">
+    <h2>経営数値ダッシュボード</h2>
+    <div id="loading" class="loading">データを取得中...</div>
+    <canvas id="salesChart" style="display:none;"></canvas>
+</div>
 
-  <main class="container">
-    
-    <section id="view-mypage" class="view fade-in">
-      <div class="profile-card">
-        <div class="profile-header">
-          <img id="user-icon" src="https://placehold.co/100" alt="User" class="avatar">
-          <div class="profile-info">
-            <p class="greeting">Welcome back,</p>
-            <h2 id="user-name">Guest User</h2>
-          </div>
-        </div>
-        <div class="chart-area-radar">
-          <canvas id="radarChart"></canvas>
-        </div>
-        <p class="chart-subtext">現在の口腔内バランス</p>
-      </div>
+<script>
+    // 【ここにGASのウェブアプリURLを貼り付けてください】
+    const GAS_API_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxx/exec';
 
-      <div class="card clickable-card" onclick="app.openChart()" style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="display:flex; align-items:center;">
-          <span style="font-size:2rem; margin-right:15px;">🦷</span>
-          <div>
-            <h3 style="margin:0; font-size:1rem; color:var(--primary);">Myデンタルチャート</h3>
-            <p style="margin:0; font-size:0.75rem; color:#666;">お口の状態を記録・管理</p>
-          </div>
-        </div>
-        <span style="font-weight:bold; color:var(--primary);">→</span>
-      </div>
+    async function fetchData() {
+        try {
+            // GASへリクエスト（redirect: "follow" が重要です）
+            const response = await fetch(GAS_API_URL, {
+                method: "GET",
+                mode: "cors",
+                redirect: "follow" 
+            });
 
-      <h3 class="section-title">チェック履歴</h3>
-      <div id="history-list" class="history-list">
-        <div class="empty-state">履歴読み込み中...</div>
-      </div>
-    </section>
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const jsonData = await response.json();
+            renderChart(jsonData);
 
-    <section id="view-chart" class="view hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <button class="btn-back" onclick="app.finishAndReturn()" style="margin:0;">← マイページ</button>
-        <h3 style="margin:0; color:var(--primary);">Myデンタルチャート</h3>
-      </div>
-      
-      <div class="chart-instruction">
-        歯をタップして状態を記録できます。<br>
-        <span class="legend"><span class="dot red"></span>注意</span>
-        <span class="legend"><span class="dot silver"></span>治療済</span>
-        <span class="legend"><span class="dot blue"></span>矯正</span>
-      </div>
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('loading').textContent = 'データの取得に失敗しました。コンソールを確認してください。';
+        }
+    }
 
-      <div class="teeth-map-container">
-        <svg id="teeth-svg" viewBox="0 0 300 360" xmlns="http://www.w3.org/2000/svg">
-          <line x1="150" y1="20" x2="150" y2="340" stroke="#eee" stroke-width="2" />
-          <line x1="20" y1="180" x2="280" y2="180" stroke="#eee" stroke-width="2" />
-          <g id="UR1" class="tooth" transform="translate(135, 160)"><rect width="26" height="30" rx="5" /></g>
-          <g id="UR2" class="tooth" transform="translate(105, 155)"><rect width="24" height="28" rx="5" /></g>
-          <g id="UR3" class="tooth" transform="translate(75, 145)"><circle r="13" cx="13" cy="13" /></g>
-          <g id="UR4" class="tooth" transform="translate(50, 130)"><rect width="22" height="22" rx="4" /></g>
-          <g id="UR5" class="tooth" transform="translate(35, 105)"><rect width="24" height="24" rx="4" /></g>
-          <g id="UR6" class="tooth" transform="translate(25, 75)"><rect width="30" height="28" rx="5" /></g>
-          <g id="UR7" class="tooth" transform="translate(25, 45)"><rect width="30" height="28" rx="5" /></g>
-          <g id="UL1" class="tooth" transform="translate(165, 160)"><rect width="26" height="30" rx="5" /></g>
-          <g id="UL2" class="tooth" transform="translate(195, 155)"><rect width="24" height="28" rx="5" /></g>
-          <g id="UL3" class="tooth" transform="translate(225, 145)"><circle r="13" cx="13" cy="13" /></g>
-          <g id="UL4" class="tooth" transform="translate(250, 130)"><rect width="22" height="22" rx="4" /></g>
-          <g id="UL5" class="tooth" transform="translate(265, 105)"><rect width="24" height="24" rx="4" /></g>
-          <g id="UL6" class="tooth" transform="translate(270, 75)"><rect width="30" height="28" rx="5" /></g>
-          <g id="UL7" class="tooth" transform="translate(270, 45)"><rect width="30" height="28" rx="5" /></g>
-          <g id="LR1" class="tooth" transform="translate(135, 195)"><rect width="24" height="26" rx="4" /></g>
-          <g id="LR2" class="tooth" transform="translate(108, 200)"><rect width="22" height="24" rx="4" /></g>
-          <g id="LR3" class="tooth" transform="translate(80, 210)"><circle r="12" cx="12" cy="12" /></g>
-          <g id="LR4" class="tooth" transform="translate(55, 230)"><rect width="22" height="22" rx="4" /></g>
-          <g id="LR5" class="tooth" transform="translate(40, 255)"><rect width="24" height="24" rx="4" /></g>
-          <g id="LR6" class="tooth" transform="translate(30, 285)"><rect width="30" height="28" rx="5" /></g>
-          <g id="LR7" class="tooth" transform="translate(30, 315)"><rect width="30" height="28" rx="5" /></g>
-          <g id="LL1" class="tooth" transform="translate(165, 195)"><rect width="24" height="26" rx="4" /></g>
-          <g id="LL2" class="tooth" transform="translate(195, 200)"><rect width="22" height="24" rx="4" /></g>
-          <g id="LL3" class="tooth" transform="translate(225, 210)"><circle r="12" cx="12" cy="12" /></g>
-          <g id="LL4" class="tooth" transform="translate(250, 230)"><rect width="22" height="22" rx="4" /></g>
-          <g id="LL5" class="tooth" transform="translate(260, 255)"><rect width="24" height="24" rx="4" /></g>
-          <g id="LL6" class="tooth" transform="translate(265, 285)"><rect width="30" height="28" rx="5" /></g>
-          <g id="LL7" class="tooth" transform="translate(265, 315)"><rect width="30" height="28" rx="5" /></g>
-          
-          <text x="150" y="15" text-anchor="middle" font-size="12" fill="#999">上顎</text>
-          <text x="150" y="350" text-anchor="middle" font-size="12" fill="#999">下顎</text>
-          <text x="10" y="185" text-anchor="start" font-size="12" fill="#999">右</text>
-          <text x="290" y="185" text-anchor="end" font-size="12" fill="#999">左</text>
-        </svg>
-      </div>
-      <button class="btn-primary" onclick="app.saveChartData()" style="margin-top:20px;">保存する</button>
-    </section>
+    function renderChart(data) {
+        document.getElementById('loading').style.display = 'none';
+        const canvas = document.getElementById('salesChart');
+        canvas.style.display = 'block';
 
-    <div id="modal-tooth" class="loading-overlay hidden" style="background:rgba(0,0,0,0.6); align-items:center;">
-      <div class="card" style="width:85%; max-width:300px; padding:20px;">
-        <h3 id="modal-tooth-name" style="text-align:center; margin-top:0;">状態を選択</h3>
-        <div class="status-options">
-          <button class="btn-status healthy" onclick="app.setToothStatus('healthy')">異常なし (クリア)</button>
-          <button class="btn-status warning" onclick="app.setToothStatus('warning')">⚠ 要注意・C</button>
-          <button class="btn-status silver" onclick="app.setToothStatus('silver')">🛡 詰め物・被せ物</button>
-          <button class="btn-status ortho" onclick="app.setToothStatus('ortho')">⛓ 矯正中</button>
-          <button class="btn-status missing" onclick="app.setToothStatus('missing')">❌ 欠損・抜歯</button>
-        </div>
-        <button class="btn-link" onclick="app.closeToothModal()" style="margin-top:10px;">キャンセル</button>
-      </div>
-    </div>
+        // データの加工
+        const labels = data.map(item => item.date);
+        const insuranceData = data.map(item => item.insurancePoints);
+        const selfPayData = data.map(item => item.selfPay);
 
-    <section id="view-menu" class="view hidden">
-      <div class="sub-nav">
-        <button class="sub-nav-item active" onclick="app.switchSubTab('check')" id="sub-check">セルフ診断</button>
-        <button class="sub-nav-item" onclick="app.switchSubTab('know')" id="sub-know">歯科知識</button>
-      </div>
+        new Chart(canvas, {
+            type: 'bar', // 棒グラフと折れ線の複合グラフ
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '自費売上 (円)',
+                        data: selfPayData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '保険点数 (点)',
+                        data: insuranceData,
+                        type: 'line', // 折れ線
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: '自費売上' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: '保険点数' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
 
-      <div id="content-check" class="fade-in">
-        <div class="hero-card small-hero">
-          <h2>Self Check</h2>
-          <p>気になる項目をチェックしましょう</p>
-        </div>
-        <div class="grid-menu">
-          <div class="grid-card" onclick="app.startDiagnosis('periodontal')">
-            <div class="grid-icon">🦷</div><h3>歯周病</h3><p>出血・口臭</p>
-          </div>
-          <div class="grid-card" onclick="app.startDiagnosis('aesthetic')">
-            <div class="grid-icon">✨</div><h3>審美</h3><p>見た目・色</p>
-          </div>
-          <div class="grid-card" onclick="app.startDiagnosis('stain')">
-            <div class="grid-icon">☕</div><h3>ステイン</h3><p>着色リスク</p>
-          </div>
-          <div class="grid-card" onclick="app.startDiagnosis('breath')">
-            <div class="grid-icon">💨</div><h3>口臭</h3><p>エチケット</p>
-          </div>
-          <div class="grid-card" onclick="app.startDiagnosis('brushing')">
-            <div class="grid-icon">🪥</div><h3>磨き方</h3><p>習慣チェック</p>
-          </div>
-        </div>
-      </div>
+    // ページ読み込み時に実行
+    fetchData();
+</script>
 
-      <div id="content-know" class="hidden fade-in">
-        <div class="knowledge-list">
-          <div class="knowledge-card" onclick="app.showKnowledge('perio_truth')">
-            <div class="k-tag">重要</div><h3>歯周病の正体とは？</h3><p>サイレントキラーと呼ばれる理由</p>
-          </div>
-          <div class="knowledge-card" onclick="app.showKnowledge('pro_care')">
-            <div class="k-tag">ケア</div><h3>プロのケア vs 自宅のケア</h3><p>歯磨きだけでは限界がある理由</p>
-          </div>
-          <div class="knowledge-card" onclick="app.showKnowledge('child')">
-            <div class="k-tag">小児</div><h3>お子様の歯 Q&A</h3><p>フッ素・矯正・仕上げ磨き</p>
-          </div>
-          <div class="knowledge-card" onclick="app.showKnowledge('implant')">
-            <div class="k-tag">治療</div><h3>インプラントの秘訣</h3><p>長持ちさせるためのメンテナンス</p>
-          </div>
-          <div class="knowledge-card" onclick="app.showKnowledge('goods')">
-            <div class="k-tag">グッズ</div><h3>おすすめケアグッズ</h3><p>プロが選ぶ歯ブラシ・フロス</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-question" class="view hidden">
-      <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
-      <div class="question-card">
-        <div class="step-label">QUESTION <span id="q-current">1</span></div>
-        <h2 id="q-text" class="question-text">--</h2>
-        <div id="q-options" class="options-grid"></div>
-      </div>
-    </section>
-
-    <section id="view-result" class="view hidden">
-      <div class="result-header">
-        <h3>診断レポート</h3>
-        <p class="date" id="result-date">--</p>
-      </div>
-      <div class="score-card">
-        <div class="score-row">
-          <div class="score-item"><span class="label">あなたのスコア</span><div class="value-box"><span class="value" id="result-score">--</span><span class="unit">点</span></div></div>
-          <div class="score-item"><span class="label">リスクレベル</span><div class="level-badge" id="result-level">-</div></div>
-        </div>
-        <hr class="divider">
-        <p class="result-summary" id="result-summary">--</p>
-      </div>
-      <div class="chart-card">
-        <h4>年代別平均との比較</h4>
-        <div class="chart-container"><canvas id="scoreChart"></canvas></div>
-        <p class="chart-caption">※同年代の患者様データに基づく比較</p>
-      </div>
-      <div class="advice-card">
-        <h4><span class="icon">💡</span> 今後のアドバイス</h4>
-        <p id="result-advice">--</p>
-      </div>
-      <div class="cta-area">
-        <button class="btn-primary" onclick="app.finishAndReturn()">レポートを保存して終了</button>
-        <a href="#" class="btn-link">WEB予約はこちら &gt;</a>
-      </div>
-    </section>
-
-    <section id="view-knowledge" class="view hidden">
-      <button class="btn-back" onclick="app.closeKnowledge()">← 一覧に戻る</button>
-      <div class="article-card">
-        <h2 id="k-title">タイトル</h2>
-        <div id="k-content" class="article-body">本文...</div>
-        <button class="btn-primary" style="margin-top:20px;" onclick="app.closeKnowledge()">閉じる</button>
-      </div>
-    </section>
-
-    <div id="global-loading" class="loading-overlay hidden"><div class="spinner"></div></div>
-  </main>
-
-  <nav class="bottom-nav">
-    <button class="nav-item active" onclick="app.switchTab('mypage')" id="nav-mypage"><span class="nav-icon">👤</span><span class="nav-label">マイページ</span></button>
-    <button class="nav-item" onclick="app.switchTab('menu')" id="nav-menu"><span class="nav-icon">🩺</span><span class="nav-label">診断・知識</span></button>
-  </nav>
-
-  <script src="script.js"></script>
 </body>
 </html>
