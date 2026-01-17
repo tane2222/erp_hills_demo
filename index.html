@@ -164,4 +164,75 @@
 
 <script type="module">
   // Firebase SDKのインポート
-  import { initializeApp } from "
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  // Firebase構成設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPWYzP72y42Kle1Q-MDQjUdlnPlDyifxc",
+    authDomain: "decmo-hills--demo.firebaseapp.com",
+    projectId: "decmo-hills--demo",
+    storageBucket: "decmo-hills--demo.firebasestorage.app",
+    messagingSenderId: "166692708725",
+    appId: "1:166692708725:web:dc13314d3b98216f12733c",
+    measurementId: "G-TJPQT3H28R"
+  };
+
+  // Firebase初期化
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // ログインボタンの処理
+  const loginBtn = document.getElementById('login-btn');
+  if(loginBtn) {
+      loginBtn.addEventListener('click', () => {
+        signInWithPopup(auth, provider)
+          .catch((error) => {
+            console.error("Login Failed:", error);
+            const errorMsg = document.getElementById('login-error');
+            errorMsg.textContent = "ログインに失敗しました: " + error.message;
+            errorMsg.style.display = 'block';
+          });
+      });
+  }
+
+  // 認証状態の監視
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // --- ログイン成功時 ---
+      console.log("Logged in as:", user.email);
+      
+      // 1. オーバーレイを消す
+      document.getElementById('login-overlay').style.display = 'none';
+      
+      // 2. ユーザー情報をUIに反映
+      const userNameElem = document.querySelector('.user-name');
+      if(userNameElem) userNameElem.textContent = user.displayName;
+      
+      // 3. トークンを取得してメイン処理(startApp)を開始
+      // script.jsが読み込まれるのを待つ必要があるため、少し安全策をとる
+      try {
+          const token = await user.getIdToken();
+          if (typeof window.startApp === 'function') {
+              window.startApp(token);
+          } else {
+              console.error("window.startApp is not defined. script.js may not be loaded.");
+              // script.jsのロード待ちリトライ（念のため）
+              setTimeout(() => {
+                 if (typeof window.startApp === 'function') window.startApp(token);
+              }, 500);
+          }
+      } catch(e) {
+          console.error("Token error:", e);
+      }
+      
+    } else {
+      // --- 未ログイン時 ---
+      document.getElementById('login-overlay').style.display = 'flex';
+    }
+  });
+</script>
+
+</body>
+</html>
