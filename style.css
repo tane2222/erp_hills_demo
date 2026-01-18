@@ -98,9 +98,34 @@ body {
     color: var(--sidebar-active);
 }
 
+/* --- サイドバーフッターの修正 --- */
 .sidebar-footer {
     border-top: 1px solid var(--border-color);
     padding-top: 20px;
+    /* 横並びにして両端に配置 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ログアウトボタンのスタイル */
+.logout-btn {
+    background: none;
+    border: none;
+    color: var(--text-sub);
+    cursor: pointer;
+    font-size: 18px; /* アイコンサイズ */
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logout-btn:hover {
+    background-color: #fee2e2; /* 薄い赤色の背景 */
+    color: #ef4444; /* 赤色のアイコン */
 }
 
 .user-info {
