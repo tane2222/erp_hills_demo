@@ -18,8 +18,116 @@ window.startApp = function(token) {
     initMonthSelector();
     initSettingsModal();
     initUploadModal(); 
+    initInputModal(); // ★追加
     fetchData('getSales'); 
 };
+
+// =================================================================
+// 手入力モーダル制御 (スタイル込み)
+// =================================================================
+function initInputModal() {
+    const modal = document.getElementById('input-modal');
+    const openBtn = document.getElementById('open-input-btn');
+    const closeBtn = document.getElementById('close-input-btn');
+    const saveBtn = document.getElementById('save-input-btn');
+    const dateInput = document.getElementById('input-target-date');
+    const formContainer = document.getElementById('input-form-container');
+
+    if(openBtn) {
+        openBtn.addEventListener('click', () => {
+            // 日付初期値セット
+            const today = new Date();
+            let defaultDate = new Date(selectedDate);
+            if (today.getMonth() === selectedDate.getMonth() && today.getFullYear() === selectedDate.getFullYear()) {
+                defaultDate = today;
+            }
+            const y = defaultDate.getFullYear();
+            const m = ('0' + (defaultDate.getMonth() + 1)).slice(-2);
+            const d = ('0' + defaultDate.getDate()).slice(-2);
+            dateInput.value = `${y}-${m}-${d}`;
+
+            renderInputForm();
+            modal.style.display = 'flex';
+        });
+    }
+
+    if(closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    function renderInputForm() {
+        formContainer.innerHTML = '';
+        // currentConfigを使ってフォーム生成
+        currentConfig.forEach(item => {
+            if (item.key === 'cancel_rate') return; // 計算項目は除外
+
+            const div = document.createElement('div');
+            div.style.cssText = "display:flex; flex-direction:column; gap:5px;";
+            
+            div.innerHTML = `
+                <label style="font-size:12px; color:var(--text-sub); font-weight:bold; display:flex; align-items:center; gap:5px;">
+                    <i class="fa-solid ${item.icon}" style="color:var(--text-sub)"></i>
+                    ${item.label}
+                </label>
+                <input type="number" class="input-field-dynamic" data-key="${item.key}" placeholder="0" style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:15px; width:100%; box-sizing:border-box;">
+            `;
+            formContainer.appendChild(div);
+        });
+    }
+
+    if(saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+            const targetDate = dateInput.value;
+            if(!targetDate) { alert('日付を選択してください'); return; }
+
+            const inputData = { date: targetDate };
+            const inputs = formContainer.querySelectorAll('input.input-field-dynamic');
+            
+            inputs.forEach(input => {
+                const key = input.dataset.key;
+                const val = input.value;
+                if (val !== '') {
+                    inputData[key] = Number(val);
+                }
+            });
+
+            saveBtn.textContent = '保存中...';
+            saveBtn.disabled = true;
+
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ 
+                        token: currentToken,
+                        action: 'manualInput',
+                        data: inputData
+                    })
+                });
+                
+                const jsonData = await response.json();
+                
+                if(jsonData.success) {
+                    alert('データを保存しました');
+                    modal.style.display = 'none';
+                    fetchData('getSales');
+                } else {
+                    alert('エラー: ' + jsonData.message);
+                }
+            } catch(e) {
+                console.error(e);
+                alert('通信エラー');
+            } finally {
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> 保存する';
+                saveBtn.disabled = false;
+            }
+        });
+    }
+}
 // =================================================================
 // 日計表アップロード制御 (画像圧縮機能付き)
 // =================================================================
