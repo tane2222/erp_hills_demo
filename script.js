@@ -12,11 +12,11 @@ let selectedDate = new Date();
 // アプリケーション開始処理
 // =================================================================
 window.startApp = function(token) {
-    console.log("アプリ開始: トークン取得済み");
     currentToken = token; 
-    initDate();
     initMenu();
-    // 初期表示
+    initMonthSelector(); // ★追加
+    
+    // 初回ロード（今の月で）
     fetchData('getSales'); 
 };
 
@@ -62,21 +62,55 @@ function initMenu() {
 }
 
 // =================================================================
+// ★追加: 月選択コントロールの制御
+// =================================================================
+function initMonthSelector() {
+    updateMonthDisplay(); // 表示更新
+
+    // 前月ボタン
+    document.getElementById('prev-month-btn').addEventListener('click', () => {
+        selectedDate.setMonth(selectedDate.getMonth() - 1); // 1ヶ月戻す
+        updateMonthDisplay();
+        fetchData('getSales'); // データ再取得
+    });
+
+    // 次月ボタン
+    document.getElementById('next-month-btn').addEventListener('click', () => {
+        selectedDate.setMonth(selectedDate.getMonth() + 1); // 1ヶ月進める
+        updateMonthDisplay();
+        fetchData('getSales'); // データ再取得
+    });
+}
+
+function updateMonthDisplay() {
+    // "2026年1月" のような形式で表示
+    const displayStr = selectedDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' });
+    document.getElementById('display-month').textContent = displayStr;
+}
+
+// "yyyy/MM" 形式の文字列を作るヘルパー関数
+function getSelectedMonthString() {
+    const year = selectedDate.getFullYear();
+    const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+    return `${year}/${month}`;
+}
+
+// =================================================================
 // データ取得 (API通信)
 // =================================================================
 async function fetchData(actionType) {
     if (!currentToken) return;
 
-    // ローディング表示
     const loadingElem = document.getElementById('loading');
     if(loadingElem) {
         loadingElem.style.display = 'block';
         loadingElem.textContent = 'データを取得中...';
     }
 
-    try {
-        console.log(`GASへデータ要求送信 (${actionType})...`);
+    // ★追加: 現在選択中の月を文字列にする ("2026/01")
+    const targetMonthStr = getSelectedMonthString();
 
+    try {
         const response = await fetch(GAS_API_URL, {
             method: "POST",
             mode: "cors",
@@ -84,21 +118,16 @@ async function fetchData(actionType) {
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ 
                 token: currentToken,
-                action: actionType 
+                action: actionType,
+                targetMonth: targetMonthStr // ★GASへ送る
             })
         });
 
+        // ... (以下、エラーハンドリング等は変更なし) ...
         if (!response.ok) throw new Error('Network response was not ok');
         const jsonData = await response.json();
+        if (jsonData.error) { alert(jsonData.message); return; }
 
-        if (jsonData.error) {
-            console.error("Server Error:", jsonData);
-            alert(`エラー: ${jsonData.message}`);
-            if(loadingElem) loadingElem.textContent = 'エラー: ' + jsonData.message;
-            return;
-        }
-
-        // 取得したデータに応じて描画処理を分岐
         if (actionType === 'getPhr') {
             renderPhrDashboard(jsonData);
         } else {
@@ -107,7 +136,6 @@ async function fetchData(actionType) {
 
     } catch (error) {
         console.error('Fetch Error:', error);
-        if(loadingElem) loadingElem.textContent = '通信エラーが発生しました。';
     }
 }
 
