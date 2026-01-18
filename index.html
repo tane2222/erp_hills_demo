@@ -278,11 +278,10 @@
             const userNameElem = document.querySelector('.user-name');
             if(userNameElem) userNameElem.textContent = user.displayName;
             
-            // ★追加: ユーザーアイコンの表示
+            // ★追加: Googleアイコン表示ロジック
             if (user.photoURL) {
                 const avatarDiv = document.querySelector('.user-avatar');
                 if (avatarDiv) {
-                    // 画像タグに置き換え。CSSで円形等は維持されるようにスタイル調整
                     avatarDiv.innerHTML = `<img src="${user.photoURL}" alt="User" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
                 }
             }
