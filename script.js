@@ -18,6 +18,7 @@ window.startApp = function(token) {
     initDate();          // 本日の日付
     initMonthSelector(); // 月選択
     initSettingsModal(); // ★追加
+    initUploadModal(); // ★追加
     fetchData('getSales'); 
 };
 
@@ -155,6 +156,117 @@ async function fetchData(actionType) {
     } catch (error) {
         console.error('Fetch Error:', error);
     }
+}
+
+// =================================================================
+// 日計表アップロード制御 (新規)
+// =================================================================
+function initUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    const openBtn = document.getElementById('open-upload-btn');
+    const closeBtn = document.getElementById('close-upload-btn');
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const executeBtn = document.getElementById('upload-execute-btn');
+    const previewArea = document.getElementById('preview-area');
+    const fileName = document.getElementById('file-name');
+
+    let selectedFile = null;
+
+    // 開く
+    if(openBtn) {
+        openBtn.addEventListener('click', () => modal.style.display = 'flex');
+    }
+    // 閉じる
+    if(closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            resetUploadForm();
+        });
+    }
+
+    // ドラッグ＆ドロップ制御
+    dropArea.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = '#3b82f6'; dropArea.style.background = '#eff6ff'; });
+    dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor = '#ccc'; dropArea.style.background = '#fafafa'; });
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = '#ccc'; dropArea.style.background = '#fafafa';
+        if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    // ファイル選択時の処理
+    function handleFile(file) {
+        selectedFile = file;
+        dropArea.style.display = 'none';
+        previewArea.style.display = 'block';
+        fileName.textContent = file.name;
+        executeBtn.disabled = false;
+        executeBtn.style.background = 'var(--accent-blue)';
+        executeBtn.style.cursor = 'pointer';
+    }
+
+    // フォームリセット
+    function resetUploadForm() {
+        selectedFile = null;
+        fileInput.value = '';
+        dropArea.style.display = 'block';
+        previewArea.style.display = 'none';
+        executeBtn.disabled = true;
+        executeBtn.style.background = '#ccc';
+        executeBtn.textContent = "AI解析スタート";
+    }
+
+    // ★実行ボタン（GASへ送信）
+    executeBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        executeBtn.textContent = "AI解析中... (30秒ほどかかります)";
+        executeBtn.disabled = true;
+
+        // ファイルをBase64に変換
+        const reader = new FileReader();
+        reader.readAsDataURL(selectedFile);
+        reader.onload = async () => {
+            const base64Data = reader.result.split(',')[1]; // "data:image/png;base64," の後ろだけ取得
+            const mimeType = selectedFile.type;
+
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ 
+                        token: currentToken,
+                        action: 'importReport', // AIインポートアクション
+                        fileData: base64Data,
+                        mimeType: mimeType
+                    })
+                });
+
+                const jsonData = await response.json();
+                
+                if (jsonData.success) {
+                    alert('インポート完了！\n' + JSON.stringify(jsonData.data, null, 2));
+                    modal.style.display = 'none';
+                    resetUploadForm();
+                    fetchData('getSales'); // 画面更新
+                } else {
+                    alert('エラー: ' + jsonData.message);
+                    resetUploadForm();
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('通信エラーが発生しました');
+                resetUploadForm();
+            }
+        };
+    });
 }
 
 // =================================================================
