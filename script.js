@@ -659,3 +659,62 @@ function renderPhrDashboard(data) {
         }
     });
 }
+
+// =================================================================
+// ロジック型AI: 数値分析アドバイス生成
+// =================================================================
+function updateAiAdvisor(summary, prevSummary) {
+    const aiTextElem = document.getElementById('ai-text-body');
+    if (!aiTextElem) return;
+
+    if (!summary || !prevSummary) {
+        aiTextElem.textContent = "データが不足しているため分析できません。";
+        return;
+    }
+
+    // 主要指標の取得
+    const sales = summary.insurance_sales + summary.self_pay_sales;
+    const prevSales = (prevSummary.insurance_sales || 0) + (prevSummary.self_pay_sales || 0);
+    const visitors = summary.visitors || 0;
+    const prevVisitors = prevSummary.visitors || 0;
+    const cancelRate = summary.cancel_rate || 0;
+    
+    // 自費率の計算
+    const selfPayRate = sales > 0 ? (summary.self_pay_sales / sales) * 100 : 0;
+
+    let messages = [];
+    let sentiment = 'neutral'; // positive, negative, neutral
+
+    // 1. 売上分析
+    if (sales > prevSales * 1.05) {
+        messages.push(`素晴らしいです！売上が前月比で増加傾向にあります（+${Math.round((sales - prevSales)/10000)}万円）。この調子で自費診療のアポイントも確保していきましょう。`);
+        sentiment = 'positive';
+    } else if (sales < prevSales * 0.95) {
+        messages.push(`売上が前月より少し落ち込んでいます。空き枠の確認と、リコール患者様へのアプローチを検討してみましょう。`);
+        sentiment = 'negative';
+    } else {
+        messages.push(`売上は前月と同水準で安定しています。`);
+    }
+
+    // 2. キャンセル率分析
+    if (cancelRate > 15) {
+        messages.push(`⚠️ キャンセル率が ${cancelRate.toFixed(1)}% と高まっています。前日の確認連絡を強化するか、無断キャンセルの多い患者様の予約管理を見直す必要があります。`);
+    } else if (cancelRate < 5 && visitors > 20) {
+        messages.push(`キャンセル率が低く抑えられています（${cancelRate.toFixed(1)}%）。患者様との信頼関係が構築できている証拠です。スタッフを労いましょう！`);
+    }
+
+    // 3. 自費率分析
+    if (selfPayRate < 20) {
+        messages.push(`自費率が ${selfPayRate.toFixed(1)}% です。カウンセリングの機会を増やし、補綴物の選択肢を提示する回数を増やしてみても良いかもしれません。`);
+    }
+
+    // メッセージの結合
+    let finalMessage = messages.join('<br><br>');
+    
+    // データがない場合
+    if (sales === 0 && visitors === 0) {
+        finalMessage = "まだ今月のデータが入力されていないようです。日計表をアップロードするか、スプレッドシートに入力してください。";
+    }
+
+    aiTextElem.innerHTML = finalMessage;
+}
