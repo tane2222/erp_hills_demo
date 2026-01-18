@@ -159,9 +159,10 @@ async function fetchData(actionType) {
 }
 
 // =================================================================
-// 日計表アップロード制御 (新規)
+// 日計表アップロード制御 (修正版: 画像圧縮機能付き)
 // =================================================================
 function initUploadModal() {
+    // ... (前半の変数定義やドラッグ＆ドロップ処理はそのまま) ...
     const modal = document.getElementById('upload-modal');
     const openBtn = document.getElementById('open-upload-btn');
     const closeBtn = document.getElementById('close-upload-btn');
@@ -173,19 +174,9 @@ function initUploadModal() {
 
     let selectedFile = null;
 
-    // 開く
-    if(openBtn) {
-        openBtn.addEventListener('click', () => modal.style.display = 'flex');
-    }
-    // 閉じる
-    if(closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            resetUploadForm();
-        });
-    }
+    if(openBtn) openBtn.addEventListener('click', () => modal.style.display = 'flex');
+    if(closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; resetUploadForm(); });
 
-    // ドラッグ＆ドロップ制御
     dropArea.addEventListener('click', () => fileInput.click());
     dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.style.borderColor = '#3b82f6'; dropArea.style.background = '#eff6ff'; });
     dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor = '#ccc'; dropArea.style.background = '#fafafa'; });
@@ -198,18 +189,16 @@ function initUploadModal() {
         if (e.target.files.length > 0) handleFile(e.target.files[0]);
     });
 
-    // ファイル選択時の処理
     function handleFile(file) {
         selectedFile = file;
         dropArea.style.display = 'none';
         previewArea.style.display = 'block';
-        fileName.textContent = file.name;
+        fileName.textContent = file.name + ` (${(file.size/1024/1024).toFixed(2)} MB)`; // サイズも表示
         executeBtn.disabled = false;
         executeBtn.style.background = 'var(--accent-blue)';
         executeBtn.style.cursor = 'pointer';
     }
 
-    // フォームリセット
     function resetUploadForm() {
         selectedFile = null;
         fileInput.value = '';
@@ -220,52 +209,121 @@ function initUploadModal() {
         executeBtn.textContent = "AI解析スタート";
     }
 
-    // ★実行ボタン（GASへ送信）
+    // ★★★ここから下を修正・追加★★★
+
+    // 画像圧縮ヘルパー関数
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const MAX_WIDTH = 1024; // 幅を最大1024pxに制限
+            const MAX_HEIGHT = 1024;
+            const reader = new FileReader();
+            
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    // サイズ調整
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // JPEGとして圧縮 (品質 0.7)
+                    // これにより数MBの画像が100KB〜300KB程度になります
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    const base64 = dataUrl.split(',')[1];
+                    resolve({ base64: base64, mimeType: 'image/jpeg' });
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
+
+    // PDFをBase64にするヘルパー関数 (PDFは圧縮せずそのまま送る)
+    const readPdf = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                resolve({ base64: base64, mimeType: file.type });
+            };
+            reader.onerror = reject;
+        });
+    };
+
+    // 実行ボタン処理
     executeBtn.addEventListener('click', async () => {
         if (!selectedFile) return;
 
-        executeBtn.textContent = "AI解析中... (30秒ほどかかります)";
+        executeBtn.textContent = "画像を圧縮して送信中...";
         executeBtn.disabled = true;
 
-        // ファイルをBase64に変換
-        const reader = new FileReader();
-        reader.readAsDataURL(selectedFile);
-        reader.onload = async () => {
-            const base64Data = reader.result.split(',')[1]; // "data:image/png;base64," の後ろだけ取得
-            const mimeType = selectedFile.type;
+        try {
+            let fileData = null;
 
-            try {
-                const response = await fetch(GAS_API_URL, {
-                    method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ 
-                        token: currentToken,
-                        action: 'importReport', // AIインポートアクション
-                        fileData: base64Data,
-                        mimeType: mimeType
-                    })
-                });
+            // ファイルタイプによって処理を分岐
+            if (selectedFile.type.startsWith('image/')) {
+                // 画像なら圧縮する
+                console.log("画像を圧縮します...");
+                fileData = await compressImage(selectedFile);
+            } else {
+                // PDFなどはそのまま
+                console.log("PDFを読み込みます...");
+                fileData = await readPdf(selectedFile);
+            }
+            
+            executeBtn.textContent = "AI解析中... (30秒ほどかかります)";
 
-                const jsonData = await response.json();
-                
-                if (jsonData.success) {
-                    alert('インポート完了！\n' + JSON.stringify(jsonData.data, null, 2));
-                    modal.style.display = 'none';
-                    resetUploadForm();
-                    fetchData('getSales'); // 画面更新
-                } else {
-                    alert('エラー: ' + jsonData.message);
-                    resetUploadForm();
-                }
+            const response = await fetch(GAS_API_URL, {
+                method: "POST",
+                mode: "cors",
+                redirect: "follow",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ 
+                    token: currentToken,
+                    action: 'importReport',
+                    fileData: fileData.base64,
+                    mimeType: fileData.mimeType
+                })
+            });
 
-            } catch (error) {
-                console.error(error);
-                alert('通信エラーが発生しました');
+            const jsonData = await response.json();
+            
+            if (jsonData.success) {
+                alert('インポート完了！\n' + JSON.stringify(jsonData.data, null, 2));
+                modal.style.display = 'none';
+                resetUploadForm();
+                fetchData('getSales');
+            } else {
+                console.error("Server Error:", jsonData);
+                alert('エラー: ' + jsonData.message);
                 resetUploadForm();
             }
-        };
+
+        } catch (error) {
+            console.error(error);
+            alert('通信エラーが発生しました。\n画像サイズが大きすぎるか、GASがタイムアウトしました。');
+            resetUploadForm();
+        }
     });
 }
 
