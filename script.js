@@ -11,11 +11,13 @@ let selectedDate = new Date();
 // =================================================================
 // アプリケーション開始処理
 // =================================================================
+let currentConfig = []; // 現在のKPI設定を保持
 window.startApp = function(token) {
     currentToken = token; 
     initMenu();
     initDate();          // 本日の日付
     initMonthSelector(); // 月選択
+    initSettingsModal(); // ★追加
     fetchData('getSales'); 
 };
 
@@ -156,9 +158,146 @@ async function fetchData(actionType) {
 }
 
 // =================================================================
+// 設定モーダル制御 (新規)
+// =================================================================
+function initSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    const openBtn = document.getElementById('open-settings-btn');
+    const closeBtn = document.getElementById('close-settings-btn');
+    const saveBtn = document.getElementById('save-settings-btn');
+
+    if(openBtn) {
+        openBtn.addEventListener('click', () => {
+            renderSettingsList(); // リストを描画
+            modal.style.display = 'flex';
+        });
+    }
+
+    if(closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    if(saveBtn) {
+        saveBtn.addEventListener('click', saveSettings);
+    }
+}
+
+// 設定リストの描画
+function renderSettingsList() {
+    const list = document.getElementById('settings-list');
+    list.innerHTML = '';
+
+    currentConfig.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "display:flex; align-items:center; padding:8px; border-bottom:1px solid #f0f0f0; background:white;";
+        
+        // チェックボックス (表示/非表示の代わりとして position を制御)
+        // 今回はシンプルに「削除はしないが、画面には出さない」機能として実装
+        // position が 'hidden' なら非表示とみなす
+        const isVisible = item.position !== 'hidden';
+        
+        div.innerHTML = `
+            <div style="margin-right:10px; color:#aaa; cursor:grab;"><i class="fa-solid fa-bars"></i></div>
+            <input type="checkbox" class="setting-check" data-index="${index}" ${isVisible ? 'checked' : ''} style="margin-right:10px;">
+            <div style="flex:1;">
+                <input type="text" class="setting-label" value="${item.label}" data-index="${index}" style="border:1px solid #ddd; padding:4px; border-radius:4px; width:100%;">
+            </div>
+            <select class="setting-pos" data-index="${index}" style="margin-left:10px; padding:4px; border:1px solid #ddd; border-radius:4px;">
+                <option value="top" ${item.position === 'top' ? 'selected' : ''}>上段 (メイン)</option>
+                <option value="sub" ${item.position === 'sub' ? 'selected' : ''}>下段 (詳細)</option>
+                <option value="hidden" ${item.position === 'hidden' ? 'selected' : ''}>非表示</option>
+            </select>
+            <div style="margin-left:10px;">
+                <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#666;">▲</button>
+                <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#666;">▼</button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// 項目の移動
+window.moveItem = function(index, direction) {
+    if (index + direction < 0 || index + direction >= currentConfig.length) return;
+    
+    // 配列の入れ替え
+    const temp = currentConfig[index];
+    currentConfig[index] = currentConfig[index + direction];
+    currentConfig[index + direction] = temp;
+    
+    renderSettingsList(); // 再描画
+};
+
+// 設定の保存
+async function saveSettings() {
+    const list = document.getElementById('settings-list');
+    const rows = list.children;
+    
+    // 画面の入力値を反映して新しいConfigを作る
+    const newConfig = [];
+    for(let i=0; i<rows.length; i++) {
+        const original = currentConfig[i]; // 元のキーやアイコン情報などを維持
+        const labelInput = rows[i].querySelector('.setting-label');
+        const posSelect = rows[i].querySelector('.setting-pos');
+        const checkInput = rows[i].querySelector('.setting-check');
+        
+        // チェックが外れてたら強制的にhidden、そうでなければプルダウンの値
+        let position = checkInput.checked ? posSelect.value : 'hidden';
+        if(position === 'hidden' && checkInput.checked) position = 'sub'; // チェックありでhiddenならsubへ復帰
+
+        newConfig.push({
+            key: original.key,
+            label: labelInput.value,
+            icon: original.icon,
+            color: original.color,
+            format: original.format,
+            position: position
+        });
+    }
+
+    // GASへ送信
+    const saveBtn = document.getElementById('save-settings-btn');
+    saveBtn.textContent = "保存中...";
+    saveBtn.disabled = true;
+
+    try {
+        const response = await fetch(GAS_API_URL, {
+            method: "POST",
+            mode: "cors",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ 
+                token: currentToken,
+                action: 'updateSettings',
+                settings: newConfig
+            })
+        });
+        
+        const jsonData = await response.json();
+        if(jsonData.success) {
+            alert('保存しました');
+            document.getElementById('settings-modal').style.display = 'none';
+            fetchData('getSales'); // 画面更新
+        } else {
+            alert('保存エラー: ' + jsonData.message);
+        }
+    } catch(e) {
+        console.error(e);
+        alert('通信エラー');
+    } finally {
+        saveBtn.textContent = "保存して反映";
+        saveBtn.disabled = false;
+    }
+}
+
+// =================================================================
 // 描画: 売上 (トレンド表示対応)
 // =================================================================
 function renderSalesDashboard(data) {
+    // データ取得時に config をグローバル変数に保存しておく（設定画面用）
+    currentConfig = data.config;
     const config = data.config;
     const summary = data.summary;
     const prevSummary = data.prevSummary || {}; // 前月データ
@@ -172,6 +311,7 @@ function renderSalesDashboard(data) {
     if (!config || !summary) return;
 
     config.forEach(item => {
+         if (item.position === 'hidden') return; // ★非表示ならスキップ
         // --- 数値フォーマット ---
         let val = summary[item.key] || 0;
         let prevVal = prevSummary[item.key] || 0;
