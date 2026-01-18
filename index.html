@@ -127,6 +127,39 @@
                 <button id="open-settings-btn" title="表示項目の設定" style="border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
                     <i class="fa-solid fa-gear"></i>
                 </button>
+
+                <button id="open-upload-btn" title="日計表を読み込む" style="margin-left:10px; border:none; background:white; color:var(--accent-blue); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
+    <i class="fa-solid fa-cloud-arrow-up"></i>
+</button>
+
+<div id="upload-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:30px; box-shadow:0 10px 25px rgba(0,0,0,0.2); text-align:center;">
+        <h3 style="margin-bottom:10px; color:var(--text-main);">日計表AIインポート</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:20px;">
+            日計表の写真やPDF、Excelのスクリーンショットをアップロードしてください。<br>
+            AIが数値を読み取り、自動入力します。
+        </p>
+        
+        <div id="drop-area" style="border:2px dashed #ccc; border-radius:10px; padding:30px; margin-bottom:20px; cursor:pointer; background:#fafafa; transition:all 0.2s;">
+            <i class="fa-solid fa-file-image" style="font-size:40px; color:#ccc; margin-bottom:10px;"></i>
+            <p style="font-size:14px; color:#999; margin:0;">ここにファイルをドラッグ<br>またはクリックして選択</p>
+            <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none;">
+        </div>
+
+        <div id="preview-area" style="display:none; margin-bottom:20px;">
+            <p id="file-name" style="font-size:12px; font-weight:bold; color:#333;"></p>
+        </div>
+
+        <button id="upload-execute-btn" disabled style="background:#ccc; color:white; border:none; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:not-allowed; width:100%;">
+            AI解析スタート
+        </button>
+        
+        <button id="close-upload-btn" style="margin-top:15px; border:none; background:none; color:#666; font-size:13px; cursor:pointer; text-decoration:underline;">
+            キャンセル
+        </button>
+    </div>
+</div>
+                
             </div>
         </header>
 
