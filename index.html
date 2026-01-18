@@ -168,7 +168,8 @@
 <script type="module">
   // Firebase SDKのインポート
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  // ★変更点: signOut を追加でインポート
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   // Firebase構成設定
   const firebaseConfig = {
@@ -186,7 +187,7 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // ログインボタンの処理
+  // --- ログイン処理 ---
   const loginBtn = document.getElementById('login-btn');
   if(loginBtn) {
       loginBtn.addEventListener('click', () => {
@@ -200,28 +201,40 @@
       });
   }
 
-  // 認証状態の監視
+  // --- ★追加: ログアウト処理 ---
+  const logoutBtn = document.getElementById('logout-btn');
+  if(logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+          if(confirm('ログアウトしますか？')) {
+              signOut(auth).then(() => {
+                  // ログアウト成功時
+                  console.log("Logged out");
+                  // ページをリロードして初期状態（ログイン画面）に戻すのが最も安全です
+                  window.location.reload();
+              }).catch((error) => {
+                  console.error("Logout Error:", error);
+                  alert("ログアウトに失敗しました");
+              });
+          }
+      });
+  }
+
+  // --- 認証状態の監視 ---
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // --- ログイン成功時 ---
+      // ログイン成功時
       console.log("Logged in as:", user.email);
-      
-      // 1. オーバーレイを消す
       document.getElementById('login-overlay').style.display = 'none';
       
-      // 2. ユーザー情報をUIに反映
       const userNameElem = document.querySelector('.user-name');
       if(userNameElem) userNameElem.textContent = user.displayName;
       
-      // 3. トークンを取得してメイン処理(startApp)を開始
-      // script.jsが読み込まれるのを待つ必要があるため、少し安全策をとる
       try {
           const token = await user.getIdToken();
           if (typeof window.startApp === 'function') {
               window.startApp(token);
           } else {
-              console.error("window.startApp is not defined. script.js may not be loaded.");
-              // script.jsのロード待ちリトライ（念のため）
+              // script.jsのロード待ちリトライ
               setTimeout(() => {
                  if (typeof window.startApp === 'function') window.startApp(token);
               }, 500);
@@ -231,7 +244,7 @@
       }
       
     } else {
-      // --- 未ログイン時 ---
+      // 未ログイン時（またはログアウト後）
       document.getElementById('login-overlay').style.display = 'flex';
     }
   });
