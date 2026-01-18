@@ -131,6 +131,9 @@
                 <button id="open-upload-btn" title="日計表を読み込む" style="margin-left:10px; border:none; background:white; color:var(--accent-blue); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
     <i class="fa-solid fa-cloud-arrow-up"></i>
 </button>
+                <button id="open-input-btn" title="手動で数値を入力" style="margin-left:10px; border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
+    <i class="fa-solid fa-pen-to-square"></i>
+</button>
 
 <div id="upload-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:30px; box-shadow:0 10px 25px rgba(0,0,0,0.2); text-align:center;">
@@ -157,6 +160,33 @@
         <button id="close-upload-btn" style="margin-top:15px; border:none; background:none; color:#666; font-size:13px; cursor:pointer; text-decoration:underline;">
             キャンセル
         </button>
+    </div>
+</div>
+
+      <div id="input-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; width:600px; max-width:95%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">日次データ入力</h3>
+            <button id="close-input-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+        </div>
+        
+        <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-weight:bold; color:var(--text-main);">
+            <label>対象日:</label>
+            <input type="date" id="input-target-date" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-family:inherit; font-size:16px; color:var(--text-main);">
+        </div>
+
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">
+            数値を入力して保存してください。既存のデータがある場合は上書きされます。
+        </p>
+
+        <div id="input-form-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:15px; overflow-y:auto; padding:5px; flex:1;">
+            </div>
+
+        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px; margin-top:15px;">
+            <button id="save-input-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <i class="fa-solid fa-save"></i> 保存する
+            </button>
+        </div>
     </div>
 </div>
                 
