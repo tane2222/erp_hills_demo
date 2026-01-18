@@ -5,6 +5,8 @@
 const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwtRjHytAQqgge6pvM_eLcgTHPPlDVIbG0ujxGGVvJg884pMsMM_qXIiw0Gn1y4Z7EzuA/exec'; 
 
 let currentToken = ""; // トークン保持用
+// ★追加: 現在選択中の日付オブジェクト（初期値は今日）
+let selectedDate = new Date();
 
 // =================================================================
 // アプリケーション開始処理
