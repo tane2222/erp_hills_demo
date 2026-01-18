@@ -114,10 +114,16 @@
                 <h2 id="page-title">診療数値ダッシュボード</h2>
             </div>
             
-            <div class="month-selector" style="display: flex; align-items: center; background: white; padding: 5px 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <button id="prev-month-btn" style="border:none; background:none; cursor:pointer; color:var(--accent-blue); font-size:16px; padding: 5px;"><i class="fa-solid fa-chevron-left"></i></button>
-                <span id="display-month" style="margin: 0 15px; font-weight:bold; font-size:16px; color:var(--text-main); min-width: 100px; text-align: center;">---</span>
-                <button id="next-month-btn" style="border:none; background:none; cursor:pointer; color:var(--accent-blue); font-size:16px; padding: 5px;"><i class="fa-solid fa-chevron-right"></i></button>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="month-selector" style="display: flex; align-items: center; background: white; padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                    <button id="prev-month-btn" style="border:none; background:none; cursor:pointer; color:var(--text-sub); padding: 5px;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <input type="month" id="month-picker" style="border:none; font-family:inherit; font-weight:bold; color:var(--text-main); font-size:15px; cursor:pointer; outline:none; background:transparent;">
+                    <button id="next-month-btn" style="border:none; background:none; cursor:pointer; color:var(--text-sub); padding: 5px;"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+                <div class="date-display" id="current-date" style="font-weight:500; color:var(--text-sub); background: white; padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                    ---
+                </div>
             </div>
         </header>
 
