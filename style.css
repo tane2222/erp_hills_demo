@@ -300,3 +300,144 @@ body {
     margin-bottom: 6px;
     line-height: 1.5;
 }
+/* =========================================
+   以下、HTML/JSから移植したスタイル
+   ========================================= */
+
+/* --- ログイン画面 --- */
+#login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f3f4f6;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.login-title {
+    margin-bottom: 20px;
+    color: var(--text-main);
+}
+
+.login-btn-google {
+    background: white;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    transition: background 0.2s;
+}
+.login-btn-google:hover {
+    background: #f9f9f9;
+}
+
+/* --- ヘッダーコントロール (月選択・日付・ボタン) --- */
+.top-bar-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.month-selector {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.nav-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-sub);
+    padding: 5px;
+}
+
+#month-picker {
+    border: none;
+    font-family: inherit;
+    font-weight: bold;
+    color: var(--text-main);
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+    background: transparent;
+}
+
+.date-display {
+    font-weight: 500;
+    color: var(--text-sub);
+    background: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.header-icon-btn {
+    border: none;
+    background: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+/* 個別の色調整 */
+#open-settings-btn { color: var(--text-sub); }
+#open-upload-btn { color: var(--accent-blue); margin-left: 10px; }
+
+/* --- モーダル共通 --- */
+.modal-overlay {
+    display: none; /* JSでflexに切り替え */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* 設定モーダル特有 */
+.modal-content.settings-
