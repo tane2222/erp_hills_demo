@@ -183,8 +183,28 @@
                 </div>
             </div>
 
-            <div class="ai-message-area">
+           <div class="ai-message-area" style="margin-top: 30px; margin-bottom: 50px;">
+                <div class="ai-card" style="display: flex; gap: 20px; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-items: flex-start;">
+                    
+                    <div class="ai-avatar" style="flex-shrink: 0; text-align: center;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #0ea5e9); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
+                            <i class="fa-solid fa-robot" style="font-size: 30px; color: white;"></i>
+                        </div>
+                        <span style="font-size: 11px; font-weight: bold; color: var(--accent-blue);">DeCMo AI</span>
+                    </div>
+
+                    <div class="ai-content" style="flex: 1;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-sparkles" style="color: var(--accent-orange);"></i> 
+                            今月の経営アドバイス
+                        </h4>
+                        <div id="ai-text-body" style="font-size: 14px; line-height: 1.6; color: var(--text-main); background: #f8fafc; padding: 15px; border-radius: 0 12px 12px 12px; border-left: 4px solid var(--accent-blue);">
+                            データを集計中です...
+                        </div>
+                    </div>
+
                 </div>
+            </div>
 
         </div>
     </main>
