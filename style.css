@@ -300,6 +300,7 @@ body {
     margin-bottom: 6px;
     line-height: 1.5;
 }
+
 /* =========================================
    以下、HTML/JSから移植したスタイル
    ========================================= */
@@ -440,4 +441,198 @@ body {
 }
 
 /* 設定モーダル特有 */
-.modal-content.settings-
+.modal-content.settings-box {
+    width: 500px;
+    max-width: 90%;
+    padding: 20px;
+}
+
+/* アップロードモーダル特有 */
+.modal-content.upload-box {
+    width: 400px;
+    max-width: 90%;
+    padding: 30px;
+    text-align: center;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.modal-header h3 { margin: 0; }
+
+.close-modal-btn {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-description {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.modal-footer {
+    text-align: right;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.primary-btn {
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.primary-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* --- 設定リスト (JSで生成される部分含む) --- */
+#settings-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.add-setting-btn {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    background: #fafafa;
+    color: #666;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+/* JS生成アイテム用クラス */
+.setting-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    background: white;
+    gap: 10px;
+}
+.setting-handle { color: #ccc; cursor: grab; font-size: 14px; }
+.setting-inputs { flex: 1; }
+.setting-main-row { display: flex; gap: 5px; margin-bottom: 4px; }
+.setting-sub-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #888; }
+.setting-label-input { border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px; font-weight: bold; width: 100%; }
+.setting-mini-input { border: none; background: #f9f9f9; padding: 2px 4px; border-radius: 3px; color: #666; }
+.setting-pos-select { padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+.setting-move-group { display: flex; flex-direction: column; gap: 2px; }
+.setting-move-btn { border: none; background: none; cursor: pointer; color: #888; font-size: 10px; }
+.setting-delete-btn { border: none; background: none; cursor: pointer; color: #e02424; margin-left: 5px; font-size: 14px; }
+
+/* --- アップロードモーダル --- */
+.upload-title { margin-bottom: 10px; color: var(--text-main); }
+.upload-desc { font-size: 13px; color: #666; margin-bottom: 20px; }
+
+#drop-area {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    background: #fafafa;
+    transition: all 0.2s;
+}
+#drop-area.active {
+    border-color: var(--accent-blue);
+    background: #eff6ff;
+}
+.drop-icon { font-size: 40px; color: #ccc; margin-bottom: 10px; }
+.drop-text { font-size: 14px; color: #999; margin: 0; }
+
+#preview-area { display: none; margin-bottom: 20px; }
+#file-name { font-size: 12px; font-weight: bold; color: #333; }
+
+#upload-execute-btn {
+    width: 100%;
+    /* 他のスタイルは primary-btn と disabled で制御 */
+}
+
+#close-upload-btn {
+    margin-top: 15px;
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* --- AIメッセージエリア --- */
+.ai-message-area {
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+.ai-card {
+    display: flex;
+    gap: 20px;
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    align-items: flex-start;
+}
+.ai-avatar {
+    flex-shrink: 0;
+    text-align: center;
+}
+.ai-avatar-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #3b82f6, #0ea5e9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+.ai-avatar-icon { font-size: 30px; color: white; }
+.ai-name { font-size: 11px; font-weight: bold; color: var(--accent-blue); }
+
+.ai-content { flex: 1; }
+.ai-title {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ai-text-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-main);
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 0 12px 12px 12px;
+    border-left: 4px solid var(--accent-blue);
+}
+
+/* --- KPIカード用 (JS生成部分) --- */
+.kpi-unit-label {
+    font-size: 12px;
+    color: #999;
+}
