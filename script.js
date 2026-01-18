@@ -158,17 +158,18 @@ async function fetchData(actionType) {
 }
 
 // =================================================================
-// 設定モーダル制御 (新規)
+// 設定モーダル制御 (追加・削除機能付き)
 // =================================================================
 function initSettingsModal() {
     const modal = document.getElementById('settings-modal');
     const openBtn = document.getElementById('open-settings-btn');
     const closeBtn = document.getElementById('close-settings-btn');
     const saveBtn = document.getElementById('save-settings-btn');
+    const addBtn = document.getElementById('add-setting-btn'); // ★追加
 
     if(openBtn) {
         openBtn.addEventListener('click', () => {
-            renderSettingsList(); // リストを描画
+            renderSettingsList();
             modal.style.display = 'flex';
         });
     }
@@ -182,6 +183,11 @@ function initSettingsModal() {
     if(saveBtn) {
         saveBtn.addEventListener('click', saveSettings);
     }
+
+    // ★追加ボタンのイベント
+    if(addBtn) {
+        addBtn.addEventListener('click', addSettingItem);
+    }
 }
 
 // 設定リストの描画
@@ -191,43 +197,78 @@ function renderSettingsList() {
 
     currentConfig.forEach((item, index) => {
         const div = document.createElement('div');
-        div.style.cssText = "display:flex; align-items:center; padding:8px; border-bottom:1px solid #f0f0f0; background:white;";
+        div.style.cssText = "display:flex; align-items:center; padding:10px; border-bottom:1px solid #f0f0f0; background:white; gap:10px;";
         
-        // チェックボックス (表示/非表示の代わりとして position を制御)
-        // 今回はシンプルに「削除はしないが、画面には出さない」機能として実装
-        // position が 'hidden' なら非表示とみなす
+        // 表示/非表示チェック (hiddenで管理)
         const isVisible = item.position !== 'hidden';
         
         div.innerHTML = `
-            <div style="margin-right:10px; color:#aaa; cursor:grab;"><i class="fa-solid fa-bars"></i></div>
-            <input type="checkbox" class="setting-check" data-index="${index}" ${isVisible ? 'checked' : ''} style="margin-right:10px;">
+            <div style="color:#ccc; cursor:grab; font-size:14px;"><i class="fa-solid fa-bars"></i></div>
+            
             <div style="flex:1;">
-                <input type="text" class="setting-label" value="${item.label}" data-index="${index}" style="border:1px solid #ddd; padding:4px; border-radius:4px; width:100%;">
+                <div style="display:flex; gap:5px; margin-bottom:4px;">
+                    <input type="text" class="setting-label" value="${item.label}" data-index="${index}" placeholder="表示名" style="border:1px solid #ddd; padding:4px 8px; border-radius:4px; font-weight:bold; width:100%;">
+                </div>
+                <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#888;">
+                    <span>Key:</span>
+                    <input type="text" class="setting-key" value="${item.key}" data-index="${index}" placeholder="列名(英字)" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:100px;">
+                    <span>Icon:</span>
+                    <input type="text" class="setting-icon" value="${item.icon}" data-index="${index}" placeholder="fa-xx" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:80px;">
+                </div>
             </div>
-            <select class="setting-pos" data-index="${index}" style="margin-left:10px; padding:4px; border:1px solid #ddd; border-radius:4px;">
+
+            <select class="setting-pos" data-index="${index}" style="padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;">
                 <option value="top" ${item.position === 'top' ? 'selected' : ''}>上段 (メイン)</option>
                 <option value="sub" ${item.position === 'sub' ? 'selected' : ''}>下段 (詳細)</option>
                 <option value="hidden" ${item.position === 'hidden' ? 'selected' : ''}>非表示</option>
             </select>
-            <div style="margin-left:10px;">
-                <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#666;">▲</button>
-                <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#666;">▼</button>
+
+            <div style="display:flex; flex-direction:column; gap:2px;">
+                <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▲</button>
+                <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▼</button>
             </div>
+
+            <button onclick="deleteSettingItem(${index})" title="削除" style="border:none; background:none; cursor:pointer; color:#e02424; margin-left:5px; font-size:14px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
         `;
         list.appendChild(div);
     });
 }
 
+// ★項目の追加
+function addSettingItem() {
+    // デフォルト値で追加
+    currentConfig.push({
+        key: 'new_column',
+        label: '新しい項目',
+        icon: 'fa-circle',
+        color: 'blue',
+        format: 'number',
+        position: 'sub'
+    });
+    renderSettingsList();
+    
+    // スクロールを一番下へ
+    const list = document.getElementById('settings-list');
+    setTimeout(() => list.scrollTop = list.scrollHeight, 0);
+}
+
+// ★項目の削除
+window.deleteSettingItem = function(index) {
+    if(confirm('この項目を削除しますか？\n（スプレッドシートの設定行が削除されます）')) {
+        currentConfig.splice(index, 1);
+        renderSettingsList();
+    }
+};
+
 // 項目の移動
 window.moveItem = function(index, direction) {
     if (index + direction < 0 || index + direction >= currentConfig.length) return;
-    
-    // 配列の入れ替え
     const temp = currentConfig[index];
     currentConfig[index] = currentConfig[index + direction];
     currentConfig[index + direction] = temp;
-    
-    renderSettingsList(); // 再描画
+    renderSettingsList();
 };
 
 // 設定の保存
@@ -235,25 +276,28 @@ async function saveSettings() {
     const list = document.getElementById('settings-list');
     const rows = list.children;
     
-    // 画面の入力値を反映して新しいConfigを作る
     const newConfig = [];
     for(let i=0; i<rows.length; i++) {
-        const original = currentConfig[i]; // 元のキーやアイコン情報などを維持
+        // 画面の入力値を全て取得して反映
         const labelInput = rows[i].querySelector('.setting-label');
+        const keyInput = rows[i].querySelector('.setting-key');
+        const iconInput = rows[i].querySelector('.setting-icon');
         const posSelect = rows[i].querySelector('.setting-pos');
-        const checkInput = rows[i].querySelector('.setting-check');
         
-        // チェックが外れてたら強制的にhidden、そうでなければプルダウンの値
-        let position = checkInput.checked ? posSelect.value : 'hidden';
-        if(position === 'hidden' && checkInput.checked) position = 'sub'; // チェックありでhiddenならsubへ復帰
+        // 元のデータから color, format は引き継ぐ（簡易編集のため今回は画面に出していない）
+        // 完全編集にするならこれらもinputを追加すればOK
+        const originalIndex = labelInput.dataset.index; // 元データのインデックスとは限らない（並べ替え後なので）
+        // 並べ替え前のプロパティを引き継ぎたいが、currentConfigはリアルタイムで入れ替わっているので
+        // currentConfig[i] をベースにするのが正しい
+        const base = currentConfig[i]; 
 
         newConfig.push({
-            key: original.key,
-            label: labelInput.value,
-            icon: original.icon,
-            color: original.color,
-            format: original.format,
-            position: position
+            key: keyInput.value.trim(),
+            label: labelInput.value.trim(),
+            icon: iconInput.value.trim(),
+            color: base.color || 'blue',
+            format: base.format || 'number',
+            position: posSelect.value
         });
     }
 
@@ -277,7 +321,7 @@ async function saveSettings() {
         
         const jsonData = await response.json();
         if(jsonData.success) {
-            alert('保存しました');
+            alert('設定を保存しました');
             document.getElementById('settings-modal').style.display = 'none';
             fetchData('getSales'); // 画面更新
         } else {
