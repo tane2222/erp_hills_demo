@@ -1,11 +1,11 @@
 // =================================================================
 // 設定
 // =================================================================
-// ★前回のまま、あなたのGASウェブアプリURLを貼り付けてください
+// ★あなたのGASウェブアプリURLを貼り付けてください
 const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwtRjHytAQqgge6pvM_eLcgTHPPlDVIbG0ujxGGVvJg884pMsMM_qXIiw0Gn1y4Z7EzuA/exec'; 
 
 let currentToken = ""; // トークン保持用
-// ★追加: 現在選択中の日付オブジェクト（初期値は今日）
+// ★現在選択中の日付オブジェクト（初期値は今日）
 let selectedDate = new Date();
 
 // =================================================================
@@ -22,6 +22,7 @@ window.startApp = function(token) {
 // =================================================================
 // 画面UI制御
 // =================================================================
+// 本日の日付表示
 function initDate() {
     const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
@@ -29,8 +30,11 @@ function initDate() {
     if(dateElem) dateElem.textContent = now.toLocaleDateString('ja-JP', options);
 }
 
+// 月選択コントロールの制御
 function initMonthSelector() {
     const picker = document.getElementById('month-picker');
+    if (!picker) return; // エラー防止
+
     updatePickerValue(); // 初期値セット
 
     // ピッカー変更時 (2024年などに飛んだ時)
@@ -42,66 +46,73 @@ function initMonthSelector() {
     });
 
     // 前月ボタン
-    document.getElementById('prev-month-btn').addEventListener('click', () => {
-        selectedDate.setMonth(selectedDate.getMonth() - 1);
-        updatePickerValue();
-        fetchData('getSales');
-    });
+    const prevBtn = document.getElementById('prev-month-btn');
+    if(prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() - 1);
+            updatePickerValue();
+            fetchData('getSales');
+        });
+    }
 
     // 次月ボタン
-    document.getElementById('next-month-btn').addEventListener('click', () => {
-        selectedDate.setMonth(selectedDate.getMonth() + 1);
-        updatePickerValue();
-        fetchData('getSales');
-    });
+    const nextBtn = document.getElementById('next-month-btn');
+    if(nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() + 1);
+            updatePickerValue();
+            fetchData('getSales');
+        });
+    }
 }
 
 // selectedDate を input type="month" の形式 (yyyy-MM) にしてセット
 function updatePickerValue() {
     const picker = document.getElementById('month-picker');
+    if (!picker) return;
+
     const y = selectedDate.getFullYear();
     const m = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
     picker.value = `${y}-${m}`;
 }
 
+// GASへ送るための文字列生成 (yyyy/MM)
 function getSelectedMonthString() {
     const y = selectedDate.getFullYear();
     const m = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
     return `${y}/${m}`;
 }
 
-// =================================================================
-// ★追加: 月選択コントロールの制御
-// =================================================================
-function initMonthSelector() {
-    updateMonthDisplay(); // 表示更新
+// メニュー切り替え制御
+function initMenu() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const pageTitle = document.getElementById('page-title');
 
-    // 前月ボタン
-    document.getElementById('prev-month-btn').addEventListener('click', () => {
-        selectedDate.setMonth(selectedDate.getMonth() - 1); // 1ヶ月戻す
-        updateMonthDisplay();
-        fetchData('getSales'); // データ再取得
+    menuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // アクティブ表示の切り替え
+            menuItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            // リンク情報の取得
+            const link = item.querySelector('a');
+            const target = link.dataset.target; 
+            const text = link.querySelector('span').textContent;
+            
+            if(pageTitle) pageTitle.textContent = text + ' ダッシュボード';
+
+            // 画面切り替えロジック
+            if (target === 'phr') {
+                fetchData('getPhr');
+            } else if (target === 'dashboard') {
+                fetchData('getSales');
+            } else {
+                alert('この機能は開発中です');
+            }
+        });
     });
-
-    // 次月ボタン
-    document.getElementById('next-month-btn').addEventListener('click', () => {
-        selectedDate.setMonth(selectedDate.getMonth() + 1); // 1ヶ月進める
-        updateMonthDisplay();
-        fetchData('getSales'); // データ再取得
-    });
-}
-
-function updateMonthDisplay() {
-    // "2026年1月" のような形式で表示
-    const displayStr = selectedDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' });
-    document.getElementById('display-month').textContent = displayStr;
-}
-
-// "yyyy/MM" 形式の文字列を作るヘルパー関数
-function getSelectedMonthString() {
-    const year = selectedDate.getFullYear();
-    const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
-    return `${year}/${month}`;
 }
 
 // =================================================================
@@ -109,8 +120,10 @@ function getSelectedMonthString() {
 // =================================================================
 async function fetchData(actionType) {
     if (!currentToken) return;
-    const loadingElem = document.getElementById('loading');
-    if(loadingElem) { loadingElem.style.display = 'block'; loadingElem.textContent = '集計中...'; }
+    const loadingElem = document.getElementById('loading'); // HTMLにloading要素がない場合は無視されますが、あると親切です
+    
+    // コンソールで動作確認
+    console.log(`Fetching data: ${actionType} for ${getSelectedMonthString()}`);
 
     try {
         const response = await fetch(GAS_API_URL, {
@@ -128,13 +141,17 @@ async function fetchData(actionType) {
         if (!response.ok) throw new Error('Network error');
         const jsonData = await response.json();
         
-        if (jsonData.error) { alert(jsonData.message); return; }
+        if (jsonData.error) { 
+            console.error("API Error:", jsonData.message);
+            alert(jsonData.message); 
+            return; 
+        }
 
         if (actionType === 'getPhr') renderPhrDashboard(jsonData);
         else renderSalesDashboard(jsonData);
 
     } catch (error) {
-        console.error(error);
+        console.error('Fetch Error:', error);
     }
 }
 
@@ -142,9 +159,6 @@ async function fetchData(actionType) {
 // 描画: 売上 (トレンド表示対応)
 // =================================================================
 function renderSalesDashboard(data) {
-    const loadingElem = document.getElementById('loading');
-    if(loadingElem) loadingElem.style.display = 'none';
-
     const config = data.config;
     const summary = data.summary;
     const prevSummary = data.prevSummary || {}; // 前月データ
@@ -175,33 +189,28 @@ function renderSalesDashboard(data) {
 
         // --- トレンド判定 (前月比) ---
         let trendHtml = '';
-        // 0割対策
         let diff = val - prevVal;
         let diffPercent = 0;
         if (prevVal !== 0) {
             diffPercent = ((val - prevVal) / prevVal) * 100;
         }
 
-        // 「良い方向」の定義 (キャンセル系は減るのが良い、それ以外は増えるのが良い)
         const isCancelMetric = item.key.includes('cancel');
         const isUp = diff >= 0;
         
         // 色とアイコンの決定
-        // 基本: 増えたらGood(緑)、減ったらBad(青)
-        // キャンセル系: 増えたらBad(青)、減ったらGood(緑)
         let trendClass = 'flat';
         let trendIcon = 'fa-minus';
         let trendText = '前月比 ±0';
 
         if (diff !== 0) {
+            // キャンセル系は「下がるのがGood」、売上などは「上がるのがGood」
             const isGood = isCancelMetric ? !isUp : isUp;
-            trendClass = isGood ? 'up' : 'down'; // CSSの .up(緑) .down(青) に対応
+            trendClass = isGood ? 'up' : 'down'; 
             trendIcon = isUp ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
             
-            // 表示用テキスト (+5% などを生成)
             const sign = isUp ? '+' : '';
             if (item.format === 'percent') {
-                // パーセント同士の差分はポイント差で表示
                 trendText = `前月比 ${sign}${diff.toFixed(1)}pt`;
             } else {
                 trendText = `前月比 ${sign}${diffPercent.toFixed(1)}%`;
@@ -276,31 +285,23 @@ function renderSalesDashboard(data) {
 // 描画: PHR (PHRアプリ連携)
 // =================================================================
 function renderPhrDashboard(data) {
-    const loadingElem = document.getElementById('loading');
-    if(loadingElem) loadingElem.style.display = 'none';
-
-    // 1. KPIカードの数値をPHR仕様に一時的に書き換え
     const summary = data.summary;
     const dailyData = data.dailyActivity;
 
     if (summary) {
         const cardSales = document.getElementById('kpi-sales');
-        // 例: 売上エリアに「登録患者数」を表示
         if(cardSales) cardSales.textContent = summary.totalUsers ? summary.totalUsers.toLocaleString() : "0";
 
         const cardVisitors = document.getElementById('kpi-visitors');
-        // 例: 来院数エリアに「診断ログ数」を表示
         if(cardVisitors) cardVisitors.textContent = summary.totalDiagnoses ? summary.totalDiagnoses.toLocaleString() : "0";
     }
 
-    // 2. グラフ描画
     const canvas = document.getElementById('salesChart');
     if (!canvas) return;
 
     const chartStatus = Chart.getChart(canvas);
     if (chartStatus) chartStatus.destroy();
 
-    // 日付と記録数
     const labels = dailyData.map(item => item.date);
     const counts = dailyData.map(item => item.count);
 
