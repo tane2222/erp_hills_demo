@@ -605,6 +605,9 @@ function renderSalesDashboard(data) {
             plugins: { tooltip: { mode: 'index', intersect: false } }
         }
     });
+
+    // AIアドバイスの更新
+    updateAiAdvisor(data.summary, data.prevSummary);
 }
 
 // =================================================================
