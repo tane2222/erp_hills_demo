@@ -110,8 +110,15 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <h2 id="page-title">経営数値ダッシュボード</h2>
-            <div class="date-display" id="current-date">---</div>
+            <div>
+                <h2 id="page-title">診療数値ダッシュボード</h2>
+            </div>
+            
+            <div class="month-selector" style="display: flex; align-items: center; background: white; padding: 5px 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <button id="prev-month-btn" style="border:none; background:none; cursor:pointer; color:var(--accent-blue); font-size:16px; padding: 5px;"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="display-month" style="margin: 0 15px; font-weight:bold; font-size:16px; color:var(--text-main); min-width: 100px; text-align: center;">---</span>
+                <button id="next-month-btn" style="border:none; background:none; cursor:pointer; color:var(--accent-blue); font-size:16px; padding: 5px;"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
         </header>
 
        <div class="content-body">
