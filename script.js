@@ -342,22 +342,22 @@ function initMenu() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // アクティブ表示の切り替え
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             
-            // リンク情報の取得
             const link = item.querySelector('a');
             const target = link.dataset.target; 
             const text = link.querySelector('span').textContent;
             
             if(pageTitle) pageTitle.textContent = text + ' ダッシュボード';
 
-            // 画面切り替えロジック
             if (target === 'phr') {
                 fetchData('getPhr');
             } else if (target === 'dashboard') {
                 fetchData('getSales');
+            } else if (target === 'ai-agent') {
+                // ★追加: AIエージェントメニュー時の処理
+                alert('AIエージェント機能は現在準備中です。\n（チャットボットなどがここに実装される予定です）');
             } else {
                 alert('この機能は開発中です');
             }
