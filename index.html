@@ -114,51 +114,19 @@
             <div class="date-display" id="current-date">---</div>
         </header>
 
-        <div class="content-body">
+       <div class="content-body">
             
-            <div class="kpi-grid">
-                <div class="card kpi-card">
-                    <div class="card-icon blue"><i class="fa-solid fa-yen-sign"></i></div>
-                    <div class="card-info">
-                        <h3>月次売上 (自費)</h3>
-                        <p class="value">¥<span id="kpi-sales">---</span></p>
-                        <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 集計中</span>
-                    </div>
-                </div>
-                
-                <div class="card kpi-card">
-                    <div class="card-icon green"><i class="fa-solid fa-users"></i></div>
-                    <div class="card-info">
-                        <h3>来院患者数</h3>
-                        <p class="value"><span id="kpi-visitors">---</span>名</p>
-                        <span class="trend flat"><i class="fa-solid fa-minus"></i> ---</span>
-                    </div>
+            <div id="kpi-top-container" class="kpi-grid">
                 </div>
 
-                <div class="card kpi-card">
-                    <div class="card-icon orange"><i class="fa-solid fa-ban"></i></div>
-                    <div class="card-info">
-                        <h3>キャンセル率</h3>
-                        <p class="value">3.2%</p>
-                        <span class="trend down"><i class="fa-solid fa-arrow-trend-down"></i> 改善傾向</span>
-                    </div>
+            <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-blue); padding-left: 10px;">詳細集計</h3>
+            <div id="kpi-sub-container" class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 30px;">
                 </div>
-                
-                 <div class="card kpi-card">
-                    <div class="card-icon purple"><i class="fa-solid fa-star"></i></div>
-                    <div class="card-info">
-                        <h3>自費率</h3>
-                        <p class="value">45%</p>
-                        <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 目標達成</span>
-                    </div>
-                </div>
-            </div>
 
             <div class="charts-grid">
                 <div class="card chart-card wide">
                     <div class="card-header">
-                        <h3>売上・来院数 推移</h3>
-                        <div id="loading" class="loading-msg">データを取得中...</div>
+                        <h3>月次推移</h3>
                     </div>
                     <div class="chart-container">
                         <canvas id="salesChart"></canvas>
@@ -167,16 +135,7 @@
             </div>
 
             <div class="ai-message-area">
-                <div class="card ai-card">
-                    <div class="ai-header">
-                        <i class="fa-solid fa-robot"></i> AIからのメッセージ
-                    </div>
-                    <div class="ai-body">
-                        <p><strong>分析:</strong> ようこそ DeCMo へ。現在データを分析中です。</p>
-                        <p><strong>提案:</strong> PHRアプリ連携を確認するにはサイドバーを選択してください。</p>
-                    </div>
                 </div>
-            </div>
 
         </div>
     </main>
