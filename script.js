@@ -110,42 +110,101 @@ async function fetchData(actionType) {
 }
 
 // =================================================================
-// 描画: 売上 (Sales)
+// 描画: 売上 (Sales) - Dynamic Version
 // =================================================================
 function renderSalesDashboard(data) {
     const loadingElem = document.getElementById('loading');
     if(loadingElem) loadingElem.style.display = 'none';
 
-    // グラフ描画
+    // データ構造: { config: [...], summary: {...}, history: [...] }
+    const config = data.config;
+    const summary = data.summary;
+    const history = data.history;
+
+    const topContainer = document.getElementById('kpi-top-container');
+    const subContainer = document.getElementById('kpi-sub-container');
+    
+    // コンテナの中身をクリア
+    if(topContainer) topContainer.innerHTML = '';
+    if(subContainer) subContainer.innerHTML = '';
+
+    if (!config || !summary) return;
+
+    // --- KPIカードの動的生成 ---
+    config.forEach(item => {
+        // 数値のフォーマット
+        let displayValue = summary[item.key] || 0;
+        let unit = '';
+        
+        if (item.format === 'currency') {
+            displayValue = Number(displayValue).toLocaleString();
+            unit = '¥';
+        } else if (item.format === 'percent') {
+            displayValue = Number(displayValue).toFixed(1);
+            unit = '%';
+        } else {
+            displayValue = Number(displayValue).toLocaleString();
+            unit = '';
+        }
+
+        // HTML生成
+        const cardHtml = `
+            <div class="card kpi-card">
+                <div class="card-icon ${item.color}">
+                    <i class="fa-solid ${item.icon}"></i>
+                </div>
+                <div class="card-info">
+                    <h3>${item.label}</h3>
+                    <p class="value">${unit === '¥' ? '¥' : ''}${displayValue}${unit === '%' ? '%' : ''}</p>
+                    ${unit === '' && item.format !== 'percent' ? '<span style="font-size:12px; color:#999;">名/件</span>' : ''}
+                </div>
+            </div>
+        `;
+
+        // 配置場所に応じて挿入
+        if (item.position === 'top') {
+            if(topContainer) topContainer.insertAdjacentHTML('beforeend', cardHtml);
+        } else {
+            if(subContainer) subContainer.insertAdjacentHTML('beforeend', cardHtml);
+        }
+    });
+
+    // --- グラフ描画 (主要項目のみ表示) ---
     const canvas = document.getElementById('salesChart');
     if (!canvas) return;
-
     const chartStatus = Chart.getChart(canvas);
     if (chartStatus) chartStatus.destroy();
-    
-    // データが空の場合のガード
-    if (!data || data.length === 0) {
-        // 空のグラフなどを表示しても良いが、今回はそのまま
-        return;
-    }
+
+    // グラフには「保険売上」と「自費売上」を表示（設定にキーが存在すれば）
+    if (!history) return;
+
+    const labels = history.map(item => item.date.substring(5)); // 月/日だけ表示
+    const insuranceData = history.map(item => item.insurance_sales || 0);
+    const selfPayData = history.map(item => item.self_pay_sales || 0);
+    const visitorData = history.map(item => item.visitors || 0);
 
     new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: data.map(item => item.date),
+            labels: labels,
             datasets: [
                 {
-                    label: '自費売上 (円)',
-                    data: data.map(item => item.selfPay),
+                    label: '自費売上',
+                    data: selfPayData,
                     backgroundColor: 'rgba(59, 130, 246, 0.6)',
                     yAxisID: 'y'
                 },
                 {
-                    label: '保険点数 (点)',
-                    data: data.map(item => item.insurancePoints),
+                    label: '保険売上',
+                    data: insuranceData,
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                    yAxisID: 'y'
+                },
+                {
+                    label: '来院数',
+                    data: visitorData,
                     type: 'line',
                     borderColor: 'rgba(245, 158, 11, 1)',
-                    borderWidth: 3,
                     tension: 0.3,
                     yAxisID: 'y1'
                 }
@@ -155,7 +214,7 @@ function renderSalesDashboard(data) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { type: 'linear', display: true, position: 'left' },
+                y: { type: 'linear', display: true, position: 'left', stacked: true }, // 売上は積み上げ
                 y1: { type: 'linear', display: true, position: 'right', grid: { display: false } }
             }
         }
