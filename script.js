@@ -140,13 +140,13 @@ async function fetchData(actionType) {
 }
 
 // =================================================================
-// 描画: 売上 (Sales) - Dynamic Version
+// 描画: 売上 (Sales)
 // =================================================================
 function renderSalesDashboard(data) {
     const loadingElem = document.getElementById('loading');
     if(loadingElem) loadingElem.style.display = 'none';
 
-    // データ構造: { config: [...], summary: {...}, history: [...] }
+    // (前半のKPIカード生成部分は変更なし...)
     const config = data.config;
     const summary = data.summary;
     const history = data.history;
@@ -154,18 +154,15 @@ function renderSalesDashboard(data) {
     const topContainer = document.getElementById('kpi-top-container');
     const subContainer = document.getElementById('kpi-sub-container');
     
-    // コンテナの中身をクリア
     if(topContainer) topContainer.innerHTML = '';
     if(subContainer) subContainer.innerHTML = '';
 
     if (!config || !summary) return;
 
-    // --- KPIカードの動的生成 ---
+    // --- KPIカード生成 (変更なし) ---
     config.forEach(item => {
-        // 数値のフォーマット
         let displayValue = summary[item.key] || 0;
         let unit = '';
-        
         if (item.format === 'currency') {
             displayValue = Number(displayValue).toLocaleString();
             unit = '¥';
@@ -176,8 +173,6 @@ function renderSalesDashboard(data) {
             displayValue = Number(displayValue).toLocaleString();
             unit = '';
         }
-
-        // HTML生成
         const cardHtml = `
             <div class="card kpi-card">
                 <div class="card-icon ${item.color}">
@@ -190,8 +185,6 @@ function renderSalesDashboard(data) {
                 </div>
             </div>
         `;
-
-        // 配置場所に応じて挿入
         if (item.position === 'top') {
             if(topContainer) topContainer.insertAdjacentHTML('beforeend', cardHtml);
         } else {
@@ -199,16 +192,21 @@ function renderSalesDashboard(data) {
         }
     });
 
-    // --- グラフ描画 (主要項目のみ表示) ---
+    // --- グラフ描画 (修正箇所) ---
     const canvas = document.getElementById('salesChart');
     if (!canvas) return;
     const chartStatus = Chart.getChart(canvas);
     if (chartStatus) chartStatus.destroy();
 
-    // グラフには「保険売上」と「自費売上」を表示（設定にキーが存在すれば）
     if (!history) return;
 
-    const labels = history.map(item => item.date.substring(5)); // 月/日だけ表示
+    // ★修正: ラベルを「日付の数字のみ」にする (2026/01/05 -> 5)
+    // historyは1日〜末日まで順番に入っているのでそのままマッピング
+    const labels = history.map(item => {
+        const d = new Date(item.date);
+        return d.getDate() + '日'; // "1日", "2日"...
+    });
+
     const insuranceData = history.map(item => item.insurance_sales || 0);
     const selfPayData = history.map(item => item.self_pay_sales || 0);
     const visitorData = history.map(item => item.visitors || 0);
@@ -222,21 +220,26 @@ function renderSalesDashboard(data) {
                     label: '自費売上',
                     data: selfPayData,
                     backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                    yAxisID: 'y'
+                    yAxisID: 'y',
+                    order: 2
                 },
                 {
                     label: '保険売上',
                     data: insuranceData,
                     backgroundColor: 'rgba(16, 185, 129, 0.6)',
-                    yAxisID: 'y'
+                    yAxisID: 'y',
+                    order: 3
                 },
                 {
                     label: '来院数',
                     data: visitorData,
                     type: 'line',
                     borderColor: 'rgba(245, 158, 11, 1)',
-                    tension: 0.3,
-                    yAxisID: 'y1'
+                    borderWidth: 2,
+                    pointRadius: 2, // ポイントを少し小さく
+                    tension: 0.1,   // 少し直線的に
+                    yAxisID: 'y1',
+                    order: 1
                 }
             ]
         },
@@ -244,13 +247,34 @@ function renderSalesDashboard(data) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { type: 'linear', display: true, position: 'left', stacked: true }, // 売上は積み上げ
-                y1: { type: 'linear', display: true, position: 'right', grid: { display: false } }
+                x: {
+                    grid: { display: false } // 縦のグリッド線を消してすっきりさせる
+                },
+                y: { 
+                    type: 'linear', 
+                    display: true, 
+                    position: 'left', 
+                    stacked: true, // 売上は積み上げ
+                    title: { display: true, text: '売上 (円)' }
+                }, 
+                y1: { 
+                    type: 'linear', 
+                    display: true, 
+                    position: 'right', 
+                    grid: { display: false },
+                    title: { display: true, text: '来院数 (名)' },
+                    min: 0 // 0からスタート
+                }
+            },
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
             }
         }
     });
 }
-
 // =================================================================
 // 描画: PHR (PHRアプリ連携)
 // =================================================================
