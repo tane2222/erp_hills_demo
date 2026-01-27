@@ -78,6 +78,7 @@ function getSelectedMonthString() {
 }
 
 // ★メニュー切り替えロジック (経営管理ページ対応)
+// メニュー切り替えロジック
 function initMenu() {
     const menuItems = document.querySelectorAll('.menu-item');
     const pageTitle = document.getElementById('page-title');
@@ -92,6 +93,7 @@ function initMenu() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             
+            // 現在のメニューをアクティブにする
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             
@@ -100,29 +102,40 @@ function initMenu() {
             const text = link.querySelector('span').textContent;
             
             // ページタイトル更新
-            if(pageTitle) pageTitle.textContent = text + (target === 'dashboard' ? 'ダッシュボード' : '');
+            if(pageTitle) pageTitle.textContent = text;
 
-            // すべてのページを非表示
+            // 1. すべてのページを非表示にする
             if(dashboardPage) dashboardPage.style.display = 'none';
             if(managementPage) managementPage.style.display = 'none';
             if(phrPage) phrPage.style.display = 'none';
             
-            // ヘッダーコントロールの表示切替 (ダッシュボード以外では月選択などは隠す)
-            if(topBarControls) topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
+            // 2. ヘッダーコントロール（月選択など）の表示切替
+            // ダッシュボードとPHR以外では隠す
+            if(topBarControls) {
+                topBarControls.style.visibility = (target === 'dashboard' || target === 'phr') ? 'visible' : 'hidden';
+            }
 
-            // ターゲットに応じた表示
+            // 3. ターゲットに応じた表示切り替え
             if (target === 'phr') {
                 if(phrPage) phrPage.style.display = 'block';
                 fetchData('getPhr');
+
             } else if (target === 'dashboard') {
                 if(dashboardPage) dashboardPage.style.display = 'block';
                 fetchData('getSales');
-            } else if (target === 'management') {
-                if(managementPage) managementPage.style.display = 'block';
+
+            } else if (target === 'management' || target === 'goals') { 
+                // ★修正点: 'management' でも 'goals' でも反応するように変更
+                if(managementPage) {
+                    managementPage.style.display = 'block';
+                } else {
+                    console.error("エラー: management-page のdivが見つかりません。HTMLを確認してください。");
+                }
+
             } else if (target === 'ai-agent') {
                 alert('AIエージェント機能は現在準備中です。');
             } else {
-                alert('この機能は開発中です');
+                alert('この機能(' + target + ')は開発中です');
             }
         });
     });
