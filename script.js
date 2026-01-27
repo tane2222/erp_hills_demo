@@ -18,35 +18,129 @@ window.startApp = function(token) {
     initMonthSelector();
     initSettingsModal();
     initUploadModal(); 
-    initInputModal(); // ★追加
     fetchData('getSales'); 
 };
 
 // =================================================================
-// 手入力モーダル制御 (スタイル込み)
+// 画面UI制御
 // =================================================================
-function initInputModal() {
-    const modal = document.getElementById('input-modal');
-    const openBtn = document.getElementById('open-input-btn');
-    const closeBtn = document.getElementById('close-input-btn');
-    const saveBtn = document.getElementById('save-input-btn');
-    const dateInput = document.getElementById('input-target-date');
-    const formContainer = document.getElementById('input-form-container');
+function initDate() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+    const dateElem = document.getElementById('current-date');
+    if(dateElem) dateElem.textContent = now.toLocaleDateString('ja-JP', options);
+}
+
+function initMonthSelector() {
+    const picker = document.getElementById('month-picker');
+    if (!picker) return;
+
+    updatePickerValue();
+
+    picker.addEventListener('change', (e) => {
+        if(e.target.value) {
+            selectedDate = new Date(e.target.value + '-01');
+            fetchData('getSales');
+        }
+    });
+
+    const prevBtn = document.getElementById('prev-month-btn');
+    if(prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() - 1);
+            updatePickerValue();
+            fetchData('getSales');
+        });
+    }
+
+    const nextBtn = document.getElementById('next-month-btn');
+    if(nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() + 1);
+            updatePickerValue();
+            fetchData('getSales');
+        });
+    }
+}
+
+function updatePickerValue() {
+    const picker = document.getElementById('month-picker');
+    if (!picker) return;
+    const y = selectedDate.getFullYear();
+    const m = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
+    picker.value = `${y}-${m}`;
+}
+
+function getSelectedMonthString() {
+    const y = selectedDate.getFullYear();
+    const m = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
+    return `${y}/${m}`;
+}
+
+// メニュー切り替えロジック (ページ切り替え対応)
+function initMenu() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const pageTitle = document.getElementById('page-title');
+    
+    // 各ページエリアを取得
+    const dashboardPage = document.getElementById('page-dashboard');
+    const goalsPage = document.getElementById('page-goals');
+    const topBarControls = document.querySelector('.top-bar-controls');
+
+    menuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // アクティブ表示の切り替え
+            menuItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            const link = item.querySelector('a');
+            const target = link.dataset.target; 
+            const text = link.querySelector('span').textContent;
+            
+            // タイトル更新
+            if(pageTitle) pageTitle.textContent = text;
+
+            // ページ表示切り替え
+            if(dashboardPage) dashboardPage.style.display = 'none';
+            if(goalsPage) goalsPage.style.display = 'none';
+            
+            // ヘッダーコントロール(月選択など)はダッシュボードのみ表示
+            if(topBarControls) {
+                topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
+            }
+
+            // ターゲット処理
+            if (target === 'dashboard') {
+                if(dashboardPage) dashboardPage.style.display = 'block';
+                fetchData('getSales');
+            } else if (target === 'goals') {
+                if(goalsPage) goalsPage.style.display = 'block';
+            } else if (target === 'phr') {
+                // PHRページはまだ実装枠がないのでダッシュボード風にアラートか、
+                // 必要ならここもdivを追加する必要がありますが、今回は要望の「経営ページ」のみ対応します
+                alert('この機能は現在準備中です: ' + text);
+            } else {
+                alert('この機能は開発中です');
+            }
+        });
+    });
+}
+
+// =================================================================
+// 設定モーダル制御
+// =================================================================
+function initSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    const openBtn = document.getElementById('open-settings-btn');
+    const closeBtn = document.getElementById('close-settings-btn');
+    const saveBtn = document.getElementById('save-settings-btn');
+    const addBtn = document.getElementById('add-setting-btn');
 
     if(openBtn) {
         openBtn.addEventListener('click', () => {
-            // 日付初期値セット
-            const today = new Date();
-            let defaultDate = new Date(selectedDate);
-            if (today.getMonth() === selectedDate.getMonth() && today.getFullYear() === selectedDate.getFullYear()) {
-                defaultDate = today;
-            }
-            const y = defaultDate.getFullYear();
-            const m = ('0' + (defaultDate.getMonth() + 1)).slice(-2);
-            const d = ('0' + defaultDate.getDate()).slice(-2);
-            dateInput.value = `${y}-${m}-${d}`;
-
-            renderInputForm();
+            renderSettingsList();
             modal.style.display = 'flex';
         });
     }
@@ -57,79 +151,144 @@ function initInputModal() {
         });
     }
 
-    function renderInputForm() {
-        formContainer.innerHTML = '';
-        // currentConfigを使ってフォーム生成
-        currentConfig.forEach(item => {
-            if (item.key === 'cancel_rate') return; // 計算項目は除外
-
-            const div = document.createElement('div');
-            div.style.cssText = "display:flex; flex-direction:column; gap:5px;";
-            
-            div.innerHTML = `
-                <label style="font-size:12px; color:var(--text-sub); font-weight:bold; display:flex; align-items:center; gap:5px;">
-                    <i class="fa-solid ${item.icon}" style="color:var(--text-sub)"></i>
-                    ${item.label}
-                </label>
-                <input type="number" class="input-field-dynamic" data-key="${item.key}" placeholder="0" style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:15px; width:100%; box-sizing:border-box;">
-            `;
-            formContainer.appendChild(div);
-        });
+    if(saveBtn) {
+        saveBtn.addEventListener('click', saveSettings);
     }
 
-    if(saveBtn) {
-        saveBtn.addEventListener('click', async () => {
-            const targetDate = dateInput.value;
-            if(!targetDate) { alert('日付を選択してください'); return; }
-
-            const inputData = { date: targetDate };
-            const inputs = formContainer.querySelectorAll('input.input-field-dynamic');
-            
-            inputs.forEach(input => {
-                const key = input.dataset.key;
-                const val = input.value;
-                if (val !== '') {
-                    inputData[key] = Number(val);
-                }
-            });
-
-            saveBtn.textContent = '保存中...';
-            saveBtn.disabled = true;
-
-            try {
-                const response = await fetch(GAS_API_URL, {
-                    method: "POST",
-                    mode: "cors",
-                    redirect: "follow",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ 
-                        token: currentToken,
-                        action: 'manualInput',
-                        data: inputData
-                    })
-                });
-                
-                const jsonData = await response.json();
-                
-                if(jsonData.success) {
-                    alert('データを保存しました');
-                    modal.style.display = 'none';
-                    fetchData('getSales');
-                } else {
-                    alert('エラー: ' + jsonData.message);
-                }
-            } catch(e) {
-                console.error(e);
-                alert('通信エラー');
-            } finally {
-                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> 保存する';
-                saveBtn.disabled = false;
-            }
-        });
+    if(addBtn) {
+        addBtn.addEventListener('click', addSettingItem);
     }
 }
+
+function renderSettingsList() {
+    const list = document.getElementById('settings-list');
+    list.innerHTML = '';
+
+    currentConfig.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "display:flex; align-items:center; padding:10px; border-bottom:1px solid #f0f0f0; background:white; gap:10px;";
+        
+        div.innerHTML = `
+            <div style="color:#ccc; cursor:grab; font-size:14px;"><i class="fa-solid fa-bars"></i></div>
+            
+            <div style="flex:1;">
+                <div style="display:flex; gap:5px; margin-bottom:4px;">
+                    <input type="text" class="setting-label" value="${item.label}" data-index="${index}" placeholder="表示名" style="border:1px solid #ddd; padding:4px 8px; border-radius:4px; font-weight:bold; width:100%;">
+                </div>
+                <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#888;">
+                    <span>Key:</span>
+                    <input type="text" class="setting-key" value="${item.key}" data-index="${index}" placeholder="列名(英字)" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:100px;">
+                    <span>Icon:</span>
+                    <input type="text" class="setting-icon" value="${item.icon}" data-index="${index}" placeholder="fa-xx" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:80px;">
+                </div>
+            </div>
+
+            <select class="setting-pos" data-index="${index}" style="padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;">
+                <option value="top" ${item.position === 'top' ? 'selected' : ''}>上段 (メイン)</option>
+                <option value="sub" ${item.position === 'sub' ? 'selected' : ''}>下段 (詳細)</option>
+                <option value="hidden" ${item.position === 'hidden' ? 'selected' : ''}>非表示</option>
+            </select>
+
+            <div style="display:flex; flex-direction:column; gap:2px;">
+                <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▲</button>
+                <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▼</button>
+            </div>
+
+            <button onclick="deleteSettingItem(${index})" title="削除" style="border:none; background:none; cursor:pointer; color:#e02424; margin-left:5px; font-size:14px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function addSettingItem() {
+    currentConfig.push({
+        key: 'new_column',
+        label: '新しい項目',
+        icon: 'fa-circle',
+        color: 'blue',
+        format: 'number',
+        position: 'sub'
+    });
+    renderSettingsList();
+    const list = document.getElementById('settings-list');
+    setTimeout(() => list.scrollTop = list.scrollHeight, 0);
+}
+
+window.deleteSettingItem = function(index) {
+    if(confirm('この項目を削除しますか？\n（スプレッドシートの設定行が削除されます）')) {
+        currentConfig.splice(index, 1);
+        renderSettingsList();
+    }
+};
+
+window.moveItem = function(index, direction) {
+    if (index + direction < 0 || index + direction >= currentConfig.length) return;
+    const temp = currentConfig[index];
+    currentConfig[index] = currentConfig[index + direction];
+    currentConfig[index + direction] = temp;
+    renderSettingsList();
+};
+
+async function saveSettings() {
+    const list = document.getElementById('settings-list');
+    const rows = list.children;
+    
+    const newConfig = [];
+    for(let i=0; i<rows.length; i++) {
+        const labelInput = rows[i].querySelector('.setting-label');
+        const keyInput = rows[i].querySelector('.setting-key');
+        const iconInput = rows[i].querySelector('.setting-icon');
+        const posSelect = rows[i].querySelector('.setting-pos');
+        const base = currentConfig[i]; 
+
+        newConfig.push({
+            key: keyInput.value.trim(),
+            label: labelInput.value.trim(),
+            icon: iconInput.value.trim(),
+            color: base.color || 'blue',
+            format: base.format || 'number',
+            position: posSelect.value
+        });
+    }
+
+    const saveBtn = document.getElementById('save-settings-btn');
+    saveBtn.textContent = "保存中...";
+    saveBtn.disabled = true;
+
+    try {
+        const response = await fetch(GAS_API_URL, {
+            method: "POST",
+            mode: "cors",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ 
+                token: currentToken,
+                action: 'updateSettings',
+                settings: newConfig
+            })
+        });
+        
+        const jsonData = await response.json();
+        if(jsonData.success) {
+            alert('設定を保存しました');
+            document.getElementById('settings-modal').style.display = 'none';
+            fetchData('getSales');
+        } else {
+            alert('保存エラー: ' + jsonData.message);
+        }
+    } catch(e) {
+        console.error(e);
+        alert('通信エラー');
+    } finally {
+        saveBtn.textContent = "保存して反映";
+        saveBtn.disabled = false;
+    }
+}
+
 // =================================================================
-// 日計表アップロード制御 (画像圧縮機能付き)
+// 日計表アップロード制御
 // =================================================================
 function initUploadModal() {
     const modal = document.getElementById('upload-modal');
@@ -162,7 +321,6 @@ function initUploadModal() {
         selectedFile = file;
         dropArea.style.display = 'none';
         previewArea.style.display = 'block';
-        // サイズを表示
         fileName.textContent = `${file.name} (${(file.size/1024).toFixed(1)} KB)`; 
         executeBtn.disabled = false;
         executeBtn.style.background = 'var(--accent-blue)';
@@ -179,7 +337,6 @@ function initUploadModal() {
         executeBtn.textContent = "AI解析スタート";
     }
 
-    // ★画像圧縮関数 (ここが重要)
     const compressImage = (file) => {
         return new Promise((resolve, reject) => {
             const MAX_WIDTH = 1024; 
@@ -269,111 +426,14 @@ function initUploadModal() {
         }
     });
 }
-// =================================================================
-// 画面UI制御
-// =================================================================
-// 本日の日付表示
-function initDate() {
-    const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
-    const dateElem = document.getElementById('current-date');
-    if(dateElem) dateElem.textContent = now.toLocaleDateString('ja-JP', options);
-}
-
-// 月選択コントロールの制御
-function initMonthSelector() {
-    const picker = document.getElementById('month-picker');
-    if (!picker) return; // エラー防止
-
-    updatePickerValue(); // 初期値セット
-
-    // ピッカー変更時 (2024年などに飛んだ時)
-    picker.addEventListener('change', (e) => {
-        if(e.target.value) {
-            selectedDate = new Date(e.target.value + '-01'); // yyyy-MM-01
-            fetchData('getSales');
-        }
-    });
-
-    // 前月ボタン
-    const prevBtn = document.getElementById('prev-month-btn');
-    if(prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            selectedDate.setMonth(selectedDate.getMonth() - 1);
-            updatePickerValue();
-            fetchData('getSales');
-        });
-    }
-
-    // 次月ボタン
-    const nextBtn = document.getElementById('next-month-btn');
-    if(nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            selectedDate.setMonth(selectedDate.getMonth() + 1);
-            updatePickerValue();
-            fetchData('getSales');
-        });
-    }
-}
-
-// selectedDate を input type="month" の形式 (yyyy-MM) にしてセット
-function updatePickerValue() {
-    const picker = document.getElementById('month-picker');
-    if (!picker) return;
-
-    const y = selectedDate.getFullYear();
-    const m = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
-    picker.value = `${y}-${m}`;
-}
-
-// GASへ送るための文字列生成 (yyyy/MM)
-function getSelectedMonthString() {
-    const y = selectedDate.getFullYear();
-    const m = ('0' + (selectedDate.getMonth() + 1)).slice(-2);
-    return `${y}/${m}`;
-}
-
-// メニュー切り替え制御
-function initMenu() {
-    const menuItems = document.querySelectorAll('.menu-item');
-    const pageTitle = document.getElementById('page-title');
-
-    menuItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // アクティブ表示の切り替え
-            menuItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            
-            // リンク情報の取得
-            const link = item.querySelector('a');
-            const target = link.dataset.target; 
-            const text = link.querySelector('span').textContent;
-            
-            if(pageTitle) pageTitle.textContent = text + ' ダッシュボード';
-
-            // 画面切り替えロジック
-            if (target === 'phr') {
-                fetchData('getPhr');
-            } else if (target === 'dashboard') {
-                fetchData('getSales');
-            } else {
-                alert('この機能は開発中です');
-            }
-        });
-    });
-}
 
 // =================================================================
 // データ取得 (API通信)
 // =================================================================
 async function fetchData(actionType) {
     if (!currentToken) return;
-    const loadingElem = document.getElementById('loading'); // HTMLにloading要素がない場合は無視されますが、あると親切です
-    
-    // コンソールで動作確認
-    console.log(`Fetching data: ${actionType} for ${getSelectedMonthString()}`);
+    const loadingElem = document.getElementById('loading');
+    if(loadingElem) loadingElem.style.display = 'block';
 
     try {
         const response = await fetch(GAS_API_URL, {
@@ -405,196 +465,17 @@ async function fetchData(actionType) {
     }
 }
 
-
-
 // =================================================================
-// 設定モーダル制御 (追加・削除機能付き)
-// =================================================================
-function initSettingsModal() {
-    const modal = document.getElementById('settings-modal');
-    const openBtn = document.getElementById('open-settings-btn');
-    const closeBtn = document.getElementById('close-settings-btn');
-    const saveBtn = document.getElementById('save-settings-btn');
-    const addBtn = document.getElementById('add-setting-btn'); // ★追加
-
-    if(openBtn) {
-        openBtn.addEventListener('click', () => {
-            renderSettingsList();
-            modal.style.display = 'flex';
-        });
-    }
-
-    if(closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-    }
-
-    if(saveBtn) {
-        saveBtn.addEventListener('click', saveSettings);
-    }
-
-    // ★追加ボタンのイベント
-    if(addBtn) {
-        addBtn.addEventListener('click', addSettingItem);
-    }
-}
-
-// 設定リストの描画
-function renderSettingsList() {
-    const list = document.getElementById('settings-list');
-    list.innerHTML = '';
-
-    currentConfig.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.style.cssText = "display:flex; align-items:center; padding:10px; border-bottom:1px solid #f0f0f0; background:white; gap:10px;";
-        
-        // 表示/非表示チェック (hiddenで管理)
-        const isVisible = item.position !== 'hidden';
-        
-        div.innerHTML = `
-            <div style="color:#ccc; cursor:grab; font-size:14px;"><i class="fa-solid fa-bars"></i></div>
-            
-            <div style="flex:1;">
-                <div style="display:flex; gap:5px; margin-bottom:4px;">
-                    <input type="text" class="setting-label" value="${item.label}" data-index="${index}" placeholder="表示名" style="border:1px solid #ddd; padding:4px 8px; border-radius:4px; font-weight:bold; width:100%;">
-                </div>
-                <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#888;">
-                    <span>Key:</span>
-                    <input type="text" class="setting-key" value="${item.key}" data-index="${index}" placeholder="列名(英字)" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:100px;">
-                    <span>Icon:</span>
-                    <input type="text" class="setting-icon" value="${item.icon}" data-index="${index}" placeholder="fa-xx" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:80px;">
-                </div>
-            </div>
-
-            <select class="setting-pos" data-index="${index}" style="padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;">
-                <option value="top" ${item.position === 'top' ? 'selected' : ''}>上段 (メイン)</option>
-                <option value="sub" ${item.position === 'sub' ? 'selected' : ''}>下段 (詳細)</option>
-                <option value="hidden" ${item.position === 'hidden' ? 'selected' : ''}>非表示</option>
-            </select>
-
-            <div style="display:flex; flex-direction:column; gap:2px;">
-                <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▲</button>
-                <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▼</button>
-            </div>
-
-            <button onclick="deleteSettingItem(${index})" title="削除" style="border:none; background:none; cursor:pointer; color:#e02424; margin-left:5px; font-size:14px;">
-                <i class="fa-solid fa-trash-can"></i>
-            </button>
-        `;
-        list.appendChild(div);
-    });
-}
-
-// ★項目の追加
-function addSettingItem() {
-    // デフォルト値で追加
-    currentConfig.push({
-        key: 'new_column',
-        label: '新しい項目',
-        icon: 'fa-circle',
-        color: 'blue',
-        format: 'number',
-        position: 'sub'
-    });
-    renderSettingsList();
-    
-    // スクロールを一番下へ
-    const list = document.getElementById('settings-list');
-    setTimeout(() => list.scrollTop = list.scrollHeight, 0);
-}
-
-// ★項目の削除
-window.deleteSettingItem = function(index) {
-    if(confirm('この項目を削除しますか？\n（スプレッドシートの設定行が削除されます）')) {
-        currentConfig.splice(index, 1);
-        renderSettingsList();
-    }
-};
-
-// 項目の移動
-window.moveItem = function(index, direction) {
-    if (index + direction < 0 || index + direction >= currentConfig.length) return;
-    const temp = currentConfig[index];
-    currentConfig[index] = currentConfig[index + direction];
-    currentConfig[index + direction] = temp;
-    renderSettingsList();
-};
-
-// 設定の保存
-async function saveSettings() {
-    const list = document.getElementById('settings-list');
-    const rows = list.children;
-    
-    const newConfig = [];
-    for(let i=0; i<rows.length; i++) {
-        // 画面の入力値を全て取得して反映
-        const labelInput = rows[i].querySelector('.setting-label');
-        const keyInput = rows[i].querySelector('.setting-key');
-        const iconInput = rows[i].querySelector('.setting-icon');
-        const posSelect = rows[i].querySelector('.setting-pos');
-        
-        // 元のデータから color, format は引き継ぐ（簡易編集のため今回は画面に出していない）
-        // 完全編集にするならこれらもinputを追加すればOK
-        const originalIndex = labelInput.dataset.index; // 元データのインデックスとは限らない（並べ替え後なので）
-        // 並べ替え前のプロパティを引き継ぎたいが、currentConfigはリアルタイムで入れ替わっているので
-        // currentConfig[i] をベースにするのが正しい
-        const base = currentConfig[i]; 
-
-        newConfig.push({
-            key: keyInput.value.trim(),
-            label: labelInput.value.trim(),
-            icon: iconInput.value.trim(),
-            color: base.color || 'blue',
-            format: base.format || 'number',
-            position: posSelect.value
-        });
-    }
-
-    // GASへ送信
-    const saveBtn = document.getElementById('save-settings-btn');
-    saveBtn.textContent = "保存中...";
-    saveBtn.disabled = true;
-
-    try {
-        const response = await fetch(GAS_API_URL, {
-            method: "POST",
-            mode: "cors",
-            redirect: "follow",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ 
-                token: currentToken,
-                action: 'updateSettings',
-                settings: newConfig
-            })
-        });
-        
-        const jsonData = await response.json();
-        if(jsonData.success) {
-            alert('設定を保存しました');
-            document.getElementById('settings-modal').style.display = 'none';
-            fetchData('getSales'); // 画面更新
-        } else {
-            alert('保存エラー: ' + jsonData.message);
-        }
-    } catch(e) {
-        console.error(e);
-        alert('通信エラー');
-    } finally {
-        saveBtn.textContent = "保存して反映";
-        saveBtn.disabled = false;
-    }
-}
-
-// =================================================================
-// 描画: 売上 (トレンド表示対応)
+// 描画: 売上 (Sales)
 // =================================================================
 function renderSalesDashboard(data) {
-    // データ取得時に config をグローバル変数に保存しておく（設定画面用）
+    const loadingElem = document.getElementById('loading');
+    if(loadingElem) loadingElem.style.display = 'none';
+
     currentConfig = data.config;
     const config = data.config;
     const summary = data.summary;
-    const prevSummary = data.prevSummary || {}; // 前月データ
+    const prevSummary = data.prevSummary || {};
     const history = data.history;
 
     const topContainer = document.getElementById('kpi-top-container');
@@ -605,8 +486,8 @@ function renderSalesDashboard(data) {
     if (!config || !summary) return;
 
     config.forEach(item => {
-         if (item.position === 'hidden') return; // ★非表示ならスキップ
-        // --- 数値フォーマット ---
+        if (item.position === 'hidden') return;
+
         let val = summary[item.key] || 0;
         let prevVal = prevSummary[item.key] || 0;
         let unit = '', displayVal = '';
@@ -621,7 +502,6 @@ function renderSalesDashboard(data) {
             displayVal = Number(val).toLocaleString();
         }
 
-        // --- トレンド判定 (前月比) ---
         let trendHtml = '';
         let diff = val - prevVal;
         let diffPercent = 0;
@@ -632,13 +512,11 @@ function renderSalesDashboard(data) {
         const isCancelMetric = item.key.includes('cancel');
         const isUp = diff >= 0;
         
-        // 色とアイコンの決定
         let trendClass = 'flat';
         let trendIcon = 'fa-minus';
         let trendText = '前月比 ±0';
 
         if (diff !== 0) {
-            // キャンセル系は「下がるのがGood」、売上などは「上がるのがGood」
             const isGood = isCancelMetric ? !isUp : isUp;
             trendClass = isGood ? 'up' : 'down'; 
             trendIcon = isUp ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
@@ -657,7 +535,6 @@ function renderSalesDashboard(data) {
             </span>
         `;
         
-        // --- HTML生成 ---
         const cardHtml = `
             <div class="card kpi-card">
                 <div class="card-icon ${item.color}">
@@ -678,7 +555,6 @@ function renderSalesDashboard(data) {
         }
     });
 
-    // --- グラフ描画 ---
     const canvas = document.getElementById('salesChart');
     if (!canvas) return;
     const chartStatus = Chart.getChart(canvas);
@@ -714,8 +590,52 @@ function renderSalesDashboard(data) {
         }
     });
 
-    // AIアドバイスの更新
     updateAiAdvisor(data.summary, data.prevSummary);
+}
+
+function updateAiAdvisor(summary, prevSummary) {
+    const aiTextElem = document.getElementById('ai-text-body');
+    if (!aiTextElem) return;
+
+    if (!summary || !prevSummary) {
+        aiTextElem.textContent = "データが不足しているため分析できません。";
+        return;
+    }
+
+    const sales = summary.insurance_sales + summary.self_pay_sales;
+    const prevSales = (prevSummary.insurance_sales || 0) + (prevSummary.self_pay_sales || 0);
+    const visitors = summary.visitors || 0;
+    const prevVisitors = prevSummary.visitors || 0;
+    const cancelRate = summary.cancel_rate || 0;
+    const selfPayRate = sales > 0 ? (summary.self_pay_sales / sales) * 100 : 0;
+
+    let messages = [];
+
+    if (sales > prevSales * 1.05) {
+        messages.push(`素晴らしいです！売上が前月比で増加傾向にあります（+${Math.round((sales - prevSales)/10000)}万円）。この調子で自費診療のアポイントも確保していきましょう。`);
+    } else if (sales < prevSales * 0.95) {
+        messages.push(`売上が前月より少し落ち込んでいます。空き枠の確認と、リコール患者様へのアプローチを検討してみましょう。`);
+    } else {
+        messages.push(`売上は前月と同水準で安定しています。`);
+    }
+
+    if (cancelRate > 15) {
+        messages.push(`⚠️ キャンセル率が ${cancelRate.toFixed(1)}% と高まっています。前日の確認連絡を強化するか、無断キャンセルの多い患者様の予約管理を見直す必要があります。`);
+    } else if (cancelRate < 5 && visitors > 20) {
+        messages.push(`キャンセル率が低く抑えられています（${cancelRate.toFixed(1)}%）。患者様との信頼関係が構築できている証拠です。スタッフを労いましょう！`);
+    }
+
+    if (selfPayRate < 20) {
+        messages.push(`自費率が ${selfPayRate.toFixed(1)}% です。カウンセリングの機会を増やし、補綴物の選択肢を提示する回数を増やしてみても良いかもしれません。`);
+    }
+
+    let finalMessage = messages.join('<br><br>');
+    
+    if (sales === 0 && visitors === 0) {
+        finalMessage = "まだ今月のデータが入力されていないようです。日計表をアップロードするか、スプレッドシートに入力してください。";
+    }
+
+    aiTextElem.innerHTML = finalMessage;
 }
 
 // =================================================================
@@ -750,7 +670,7 @@ function renderPhrDashboard(data) {
                 {
                     label: 'PHR記録アクション数',
                     data: counts,
-                    borderColor: '#10b981', // 緑色
+                    borderColor: '#10b981', 
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 3,
                     fill: true,
@@ -769,63 +689,4 @@ function renderPhrDashboard(data) {
             }
         }
     });
-}
-
-// =================================================================
-// ロジック型AI: 数値分析アドバイス生成
-// =================================================================
-function updateAiAdvisor(summary, prevSummary) {
-    const aiTextElem = document.getElementById('ai-text-body');
-    if (!aiTextElem) return;
-
-    if (!summary || !prevSummary) {
-        aiTextElem.textContent = "データが不足しているため分析できません。";
-        return;
-    }
-
-    // 主要指標の取得
-    const sales = summary.insurance_sales + summary.self_pay_sales;
-    const prevSales = (prevSummary.insurance_sales || 0) + (prevSummary.self_pay_sales || 0);
-    const visitors = summary.visitors || 0;
-    const prevVisitors = prevSummary.visitors || 0;
-    const cancelRate = summary.cancel_rate || 0;
-    
-    // 自費率の計算
-    const selfPayRate = sales > 0 ? (summary.self_pay_sales / sales) * 100 : 0;
-
-    let messages = [];
-    let sentiment = 'neutral'; // positive, negative, neutral
-
-    // 1. 売上分析
-    if (sales > prevSales * 1.05) {
-        messages.push(`素晴らしいです！売上が前月比で増加傾向にあります（+${Math.round((sales - prevSales)/10000)}万円）。この調子で自費診療のアポイントも確保していきましょう。`);
-        sentiment = 'positive';
-    } else if (sales < prevSales * 0.95) {
-        messages.push(`売上が前月より少し落ち込んでいます。空き枠の確認と、リコール患者様へのアプローチを検討してみましょう。`);
-        sentiment = 'negative';
-    } else {
-        messages.push(`売上は前月と同水準で安定しています。`);
-    }
-
-    // 2. キャンセル率分析
-    if (cancelRate > 15) {
-        messages.push(`⚠️ キャンセル率が ${cancelRate.toFixed(1)}% と高まっています。前日の確認連絡を強化するか、無断キャンセルの多い患者様の予約管理を見直す必要があります。`);
-    } else if (cancelRate < 5 && visitors > 20) {
-        messages.push(`キャンセル率が低く抑えられています（${cancelRate.toFixed(1)}%）。患者様との信頼関係が構築できている証拠です。スタッフを労いましょう！`);
-    }
-
-    // 3. 自費率分析
-    if (selfPayRate < 20) {
-        messages.push(`自費率が ${selfPayRate.toFixed(1)}% です。カウンセリングの機会を増やし、補綴物の選択肢を提示する回数を増やしてみても良いかもしれません。`);
-    }
-
-    // メッセージの結合
-    let finalMessage = messages.join('<br><br>');
-    
-    // データがない場合
-    if (sales === 0 && visitors === 0) {
-        finalMessage = "まだ今月のデータが入力されていないようです。日計表をアップロードするか、スプレッドシートに入力してください。";
-    }
-
-    aiTextElem.innerHTML = finalMessage;
 }
