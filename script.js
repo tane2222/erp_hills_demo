@@ -77,7 +77,7 @@ function getSelectedMonthString() {
     return `${y}/${m}`;
 }
 
-// メニュー切り替えロジック
+// ★メニュー切り替えロジック (経営管理ページ対応)
 function initMenu() {
     const menuItems = document.querySelectorAll('.menu-item');
     const pageTitle = document.getElementById('page-title');
@@ -99,15 +99,16 @@ function initMenu() {
             const target = link.dataset.target; 
             const text = link.querySelector('span').textContent;
             
-            if(pageTitle) pageTitle.textContent = text + ' ダッシュボード';
+            // ページタイトル更新
+            if(pageTitle) pageTitle.textContent = text + (target === 'dashboard' ? 'ダッシュボード' : '');
 
             // すべてのページを非表示
             if(dashboardPage) dashboardPage.style.display = 'none';
             if(managementPage) managementPage.style.display = 'none';
             if(phrPage) phrPage.style.display = 'none';
             
-            // ヘッダーコントロールの表示切替
-            if(topBarControls) topBarControls.style.visibility = (target === 'dashboard' || target === 'phr') ? 'visible' : 'hidden';
+            // ヘッダーコントロールの表示切替 (ダッシュボード以外では月選択などは隠す)
+            if(topBarControls) topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
 
             // ターゲットに応じた表示
             if (target === 'phr') {
@@ -118,8 +119,6 @@ function initMenu() {
                 fetchData('getSales');
             } else if (target === 'management') {
                 if(managementPage) managementPage.style.display = 'block';
-                if(topBarControls) topBarControls.style.visibility = 'hidden'; // 経営管理では月選択などは不要
-                pageTitle.textContent = '経営目標・理念';
             } else if (target === 'ai-agent') {
                 alert('AIエージェント機能は現在準備中です。');
             } else {
@@ -128,7 +127,6 @@ function initMenu() {
         });
     });
 }
-
 
 // =================================================================
 // 設定モーダル制御
