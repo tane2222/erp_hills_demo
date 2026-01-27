@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -16,370 +15,345 @@
 
 <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#f3f4f6; z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column;">
     <div style="background:white; padding:40px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); text-align:center; max-width:400px; width:90%;">
-        <div style="margin-bottom:20px;">
-            <i class="fa-solid fa-tooth" style="font-size: 48px; color: var(--accent-blue);"></i>
+        <div style="font-size:40px; color:#3b82f6; margin-bottom:10px;"><i class="fa-solid fa-tooth"></i></div>
+        <h2 style="margin-bottom:10px; color:#1e293b;">DeCMo</h2>
+        <span style="font-size: 12px; color: #64748b; display: block; margin-bottom: 20px;">(デクモ) Dental Clinic's Module Soft</span>
+        
+        <button id="login-btn" style="background:#3b82f6; color:white; border:none; padding:12px 24px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:16px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; transition: opacity 0.2s;">
+            <i class="fa-brands fa-google"></i> Googleでログイン
+        </button>
+        <p id="login-error" style="color:red; font-size:12px; margin-top:15px; display:none;"></p>
+    </div>
+</div>
+
+<div class="app-container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"><i class="fa-solid fa-tooth"></i></div>
+            <div>
+                <h1 class="logo-text">DeCMo</h1>
+                <span style="font-size: 10px; color: var(--text-sub); display: block; line-height: 1;">(デクモ)</span>
+            </div>
         </div>
-        <h2 style="margin-bottom:20px; color:var(--text-main);">DeCMo Login</h2>
-        <p style="color:#666; margin-bottom:30px; font-size:14px;">Googleアカウントでログインしてください</p>
-        <button id="google-login-btn" style="background:white; color:#555; border:1px solid #ddd; padding:12px 20px; border-radius:6px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; width:100%; transition:background 0.2s;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" width="20">
-            Googleでログイン
+
+        <ul class="menu-list">
+            <li class="menu-item">
+                <a href="#" data-target="goals">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>経営目標・理念</span>
+                </a>
+            </li>
+
+            <li class="menu-item active">
+                <a href="#" data-target="dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>診療数値</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" data-target="accounting">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>会計管理</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" data-target="phr">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>患者PHRアプリ連携</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" data-target="satisfaction">
+                    <i class="fa-regular fa-face-smile"></i>
+                    <span>患者満足</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" data-target="marketing">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>マーケティング</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" data-target="recruitment">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>人材採用</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="#" data-target="engagement">
+                    <i class="fa-solid fa-people-roof"></i>
+                    <span>エンゲージメント</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+    <div class="user-info">
+        <div class="avatar"><i class="fa-solid fa-user"></i></div>
+        <div class="user-details">
+            <span class="user-name">ゲスト</span>
+            <span class="user-role">管理者</span>
+        </div>
+    </div>
+    <button id="logout-btn" class="logout-btn" title="ログアウト">
+        <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+</div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div>
+                <h2 id="page-title">診療数値ダッシュボード</h2>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="month-selector" style="display: flex; align-items: center; background: white; padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                    <button id="prev-month-btn" style="border:none; background:none; cursor:pointer; color:var(--text-sub); padding: 5px;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <input type="month" id="month-picker" style="border:none; font-family:inherit; font-weight:bold; color:var(--text-main); font-size:15px; cursor:pointer; outline:none; background:transparent;">
+                    <button id="next-month-btn" style="border:none; background:none; cursor:pointer; color:var(--text-sub); padding: 5px;"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+                <div class="date-display" id="current-date" style="font-weight:500; color:var(--text-sub); background: white; padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                    ---
+                </div>
+                <button id="open-settings-btn" title="表示項目の設定" style="border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+
+                <button id="open-upload-btn" title="日計表を読み込む" style="margin-left:10px; border:none; background:white; color:var(--accent-blue); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
+    <i class="fa-solid fa-cloud-arrow-up"></i>
+</button>
+                <button id="open-input-btn" title="手動で数値を入力" style="margin-left:10px; border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
+    <i class="fa-solid fa-pen-to-square"></i>
+</button>
+
+<div id="upload-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:30px; box-shadow:0 10px 25px rgba(0,0,0,0.2); text-align:center;">
+        <h3 style="margin-bottom:10px; color:var(--text-main);">日計表AIインポート</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:20px;">
+            日計表の写真やPDF、Excelのスクリーンショットをアップロードしてください。<br>
+            AIが数値を読み取り、自動入力します。
+        </p>
+        
+        <div id="drop-area" style="border:2px dashed #ccc; border-radius:10px; padding:30px; margin-bottom:20px; cursor:pointer; background:#fafafa; transition:all 0.2s;">
+            <i class="fa-solid fa-file-image" style="font-size:40px; color:#ccc; margin-bottom:10px;"></i>
+            <p style="font-size:14px; color:#999; margin:0;">ここにファイルをドラッグ<br>またはクリックして選択</p>
+            <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none;">
+        </div>
+
+        <div id="preview-area" style="display:none; margin-bottom:20px;">
+            <p id="file-name" style="font-size:12px; font-weight:bold; color:#333;"></p>
+        </div>
+
+        <button id="upload-execute-btn" disabled style="background:#ccc; color:white; border:none; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:not-allowed; width:100%;">
+            AI解析スタート
+        </button>
+        
+        <button id="close-upload-btn" style="margin-top:15px; border:none; background:none; color:#666; font-size:13px; cursor:pointer; text-decoration:underline;">
+            キャンセル
         </button>
     </div>
 </div>
 
-<nav class="sidebar">
-    <div class="logo-area">
-        <div class="logo-icon">
-            <i class="fa-solid fa-tooth"></i>
-        </div>
-        <div class="logo-text">
-            <h1>DeCMo</h1>
-            <p>Dental ERP</p>
-        </div>
-    </div>
-
-    <ul class="menu-list">
-        <li class="menu-item">
-            <a href="#" data-target="management">
-                <i class="fa-solid fa-compass"></i>
-                <span>経営管理</span>
-            </a>
-        </li>
-        <li class="menu-item active">
-            <a href="#" data-target="dashboard">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>診療数値</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="#" data-target="phr">
-                <i class="fa-solid fa-heart-pulse"></i>
-                <span>PHR管理</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="#">
-                <i class="fa-solid fa-calendar-days"></i>
-                <span>予約管理</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="#">
-                <i class="fa-solid fa-user-group"></i>
-                <span>患者リスト</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="#">
-                <i class="fa-solid fa-bullhorn"></i>
-                <span>マーケティング</span>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="#" data-target="ai-agent">
-                <i class="fa-solid fa-robot"></i>
-                <span>AIエージェント</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="user-profile">
-        <div class="user-avatar">
-            <i class="fa-solid fa-user-doctor"></i>
-        </div>
-        <div class="user-info">
-            <p class="user-name">Guest User</p>
-            <p class="user-role">管理者</p>
-        </div>
-        <button id="logout-btn" style="border:none; background:none; cursor:pointer; color:#999;" title="ログアウト">
-            <i class="fa-solid fa-right-from-bracket"></i>
-        </button>
-    </div>
-</nav>
-
-<main class="main-content">
-    <header class="top-bar">
-        <div>
-            <h2 id="page-title">診療数値ダッシュボード</h2>
+      <div id="input-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; width:600px; max-width:95%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">日次データ入力</h3>
+            <button id="close-input-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
         </div>
         
-        <div class="top-bar-controls" style="display: flex; align-items: center; gap: 20px;">
-            <div class="month-selector" style="display: flex; align-items: center; background: white; padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
-                <button id="prev-month-btn" style="border:none; background:none; cursor:pointer; color:var(--text-sub); padding: 5px;"><i class="fa-solid fa-chevron-left"></i></button>
-                <input type="month" id="month-picker" style="border:none; font-family:inherit; font-weight:bold; color:var(--text-main); font-size:15px; cursor:pointer; outline:none; background:transparent;">
-                <button id="next-month-btn" style="border:none; background:none; cursor:pointer; color:var(--text-sub); padding: 5px;"><i class="fa-solid fa-chevron-right"></i></button>
+        <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-weight:bold; color:var(--text-main);">
+            <label>対象日:</label>
+            <input type="date" id="input-target-date" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-family:inherit; font-size:16px; color:var(--text-main);">
+        </div>
+
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">
+            数値を入力して保存してください。既存のデータがある場合は上書きされます。
+        </p>
+
+        <div id="input-form-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:15px; overflow-y:auto; padding:5px; flex:1;">
             </div>
 
-            <div class="date-display" id="current-date" style="font-weight:500; color:var(--text-sub); background: white; padding: 8px 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
-                ---
-            </div>
-
-            <button id="open-settings-btn" title="表示項目の設定" style="border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                <i class="fa-solid fa-gear"></i>
-            </button>
-
-            <button id="open-upload-btn" title="日計表を読み込む" style="margin-left:10px; border:none; background:white; color:var(--accent-blue); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-            </button>
-
-            <button id="open-input-btn" title="手動で数値を入力" style="margin-left:10px; border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                <i class="fa-solid fa-pen-to-square"></i>
+        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px; margin-top:15px;">
+            <button id="save-input-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <i class="fa-solid fa-save"></i> 保存する
             </button>
         </div>
-    </header>
-
-    <div id="dashboard-page" class="content-body page-section">
-        <div id="kpi-top-container" class="kpi-grid"></div>
-        <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-blue); padding-left: 10px;">詳細集計</h3>
-        <div id="kpi-sub-container" class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 30px;"></div>
-        <div class="charts-grid">
-            <div class="card chart-card wide">
-                <div class="card-header"><h3>月次推移</h3></div>
-                <div class="chart-container"><canvas id="salesChart"></canvas></div>
-            </div>
-        </div>
-        <div class="ai-message-area" style="margin-top: 30px; margin-bottom: 50px;">
-            <div class="ai-card" style="display: flex; gap: 20px; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-items: flex-start;">
-                <div class="ai-avatar" style="flex-shrink: 0; text-align: center;">
-                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #0ea5e9); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
-                        <i class="fa-solid fa-robot" style="font-size: 30px; color: white;"></i>
-                    </div>
-                    <span style="font-size: 11px; font-weight: bold; color: var(--accent-blue);">DeCMo AI</span>
-                </div>
-                <div class="ai-content" style="flex: 1;">
-                    <h4 style="margin: 0 0 10px 0; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-sparkles" style="color: var(--accent-orange);"></i> 
-                        今月の経営アドバイス
-                    </h4>
-                    <div id="ai-text-body" style="font-size: 14px; line-height: 1.6; color: var(--text-main); background: #f8fafc; padding: 15px; border-radius: 0 12px 12px 12px; border-left: 4px solid var(--accent-blue);">
-                        データを集計中です...
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
-
-    <div id="management-page" class="content-body page-section" style="display:none;">
-        
-        <div class="card" style="padding: 25px; margin-bottom: 30px; border-left: 5px solid var(--accent-purple);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0; font-size:18px; color:var(--text-main);"><i class="fa-solid fa-flag" style="margin-right:10px; color:var(--accent-purple);"></i>医院理念・Mission</h3>
-                <button style="border:none; background:none; color:var(--text-sub); cursor:pointer;"><i class="fa-solid fa-pen"></i> 編集</button>
+</div>
+                
             </div>
-            <p style="font-size:16px; font-weight:bold; color:#333; line-height:1.8;">
-                「患者様の生涯の健康パートナーとして、<br>
-                心からの笑顔と安心を提供する歯科医院を目指す」
-            </p>
+        </header>
+
+       <div class="content-body">
+            
+            <div id="kpi-top-container" class="kpi-grid">
+                </div>
+
+            <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-blue); padding-left: 10px;">詳細集計</h3>
+            <div id="kpi-sub-container" class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 30px;">
+                </div>
+
+            <div class="charts-grid">
+                <div class="card chart-card wide">
+                    <div class="card-header">
+                        <h3>月次推移</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+           <div class="ai-message-area" style="margin-top: 30px; margin-bottom: 50px;">
+                <div class="ai-card" style="display: flex; gap: 20px; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-items: flex-start;">
+                    
+                    <div class="ai-avatar" style="flex-shrink: 0; text-align: center;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #0ea5e9); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
+                            <i class="fa-solid fa-robot" style="font-size: 30px; color: white;"></i>
+                        </div>
+                        <span style="font-size: 11px; font-weight: bold; color: var(--accent-blue);">DeCMo AI</span>
+                    </div>
+
+                    <div class="ai-content" style="flex: 1;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-sparkles" style="color: var(--accent-orange);"></i> 
+                            今月の経営アドバイス
+                        </h4>
+                        <div id="ai-text-body" style="font-size: 14px; line-height: 1.6; color: var(--text-main); background: #f8fafc; padding: 15px; border-radius: 0 12px 12px 12px; border-left: 4px solid var(--accent-blue);">
+                            データを集計中です...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
-
-        <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-blue); padding-left: 10px;">経営重要指標 (KGI/KPI)</h3>
-        
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-bottom:30px;">
-            <div class="card" style="padding: 20px;">
-                <h4 style="margin:0 0 15px 0; color:var(--text-sub); font-size:14px;">経営リソース設定</h4>
-                <div style="display:flex; gap:15px; margin-bottom:10px;">
-                    <div style="flex:1;">
-                        <label style="font-size:12px; color:var(--text-sub);">ユニット台数</label>
-                        <input type="number" value="3" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-weight:bold;">
-                    </div>
-                    <div style="flex:1;">
-                        <label style="font-size:12px; color:var(--text-sub);">スタッフ数</label>
-                        <input type="number" value="5" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-weight:bold;">
-                    </div>
-                    <div style="flex:1;">
-                        <label style="font-size:12px; color:var(--text-sub);">月間診療時間</label>
-                        <input type="number" value="160" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-weight:bold;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" style="padding: 20px; background:#f8fafc;">
-                <h4 style="margin:0 0 15px 0; color:var(--text-sub); font-size:14px;">生産性目標 (自動算出)</h4>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ddd; padding-bottom:5px;">
-                        <span style="font-size:13px;">ユニット1台生産性/月</span>
-                        <span style="font-weight:bold; color:var(--accent-blue);">250万円 <span style="font-size:10px; color:#999;">(目標300万)</span></span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ddd; padding-bottom:5px;">
-                        <span style="font-size:13px;">人時生産性 (1時間/台)</span>
-                        <span style="font-weight:bold; color:var(--accent-green);">15,625円 <span style="font-size:10px; color:#999;">(目標1万)</span></span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-size:13px;">スタッフ1人あたり生産性</span>
-                        <span style="font-weight:bold; color:var(--accent-orange);">150万円 <span style="font-size:10px; color:#999;">(目標120万)</span></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-green); padding-left: 10px;">戦略アクションプラン</h3>
-        
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
-            <div class="card" style="padding:20px;">
-                <h4 style="margin:0 0 15px 0; color:var(--text-main); font-size:15px; border-bottom:2px solid #ecfdf5; padding-bottom:5px;">
-                    <i class="fa-solid fa-stethoscope" style="color:var(--accent-green); margin-right:5px;"></i> 診療効率・質
-                </h4>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" checked> 応対マニュアルの整備・更新
-                    </label>
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox"> アポイント帳の空き枠対策
-                    </label>
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" checked> 診療理念ミーティングの実施
-                    </label>
-                </div>
-            </div>
-
-            <div class="card" style="padding:20px;">
-                <h4 style="margin:0 0 15px 0; color:var(--text-main); font-size:15px; border-bottom:2px solid #eff6ff; padding-bottom:5px;">
-                    <i class="fa-solid fa-comments-dollar" style="color:var(--accent-blue); margin-right:5px;"></i> 自費率向上
-                </h4>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" checked> 全新患への補綴カウンセリング
-                    </label>
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox"> 自費移行率の測定と分析
-                    </label>
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox"> カウンセリングのロールプレイング
-                    </label>
-                </div>
-            </div>
-
-            <div class="card" style="padding:20px;">
-                <h4 style="margin:0 0 15px 0; color:var(--text-main); font-size:15px; border-bottom:2px solid #fff7ed; padding-bottom:5px;">
-                    <i class="fa-solid fa-bullhorn" style="color:var(--accent-orange); margin-right:5px;"></i> 増患・集患
-                </h4>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" checked> HP・SNSの定期更新
-                    </label>
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox"> 口コミ対策・MEO
-                    </label>
-                    <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;">
-                        <input type="checkbox"> リコール率の向上施策
-                    </label>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div id="phr-page" class="content-body page-section" style="display:none;">
-        </div>
-
-    <div id="loading" style="display:none; position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.8); color:white; padding:10px 20px; border-radius:30px; z-index:9999;">Loading...</div>
-</main>
-
+    </main>
+</div>
 <div id="settings-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; width:500px; max-width:90%; border-radius:12px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0;">KPI項目設定</h3>
             <button id="close-settings-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
         </div>
-        <p style="font-size:12px; color:#666; margin-bottom:10px;">項目の並べ替え、表示設定、追加・削除ができます。<span style="color:#e02424;">※キー名はスプレッドシートの列名と一致させてください。</span></p>
-        <div id="settings-list" style="flex:1; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:15px;"></div>
-        <div style="margin-bottom:15px;"><button id="add-setting-btn" style="width:100%; padding:10px; border:2px dashed #ddd; background:#fafafa; color:#666; border-radius:8px; cursor:pointer; font-weight:bold; transition:all 0.2s;"><i class="fa-solid fa-plus"></i> 新しい項目を追加</button></div>
-        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;"><button id="save-settings-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">保存して反映</button></div>
+        
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">
+            項目の並べ替え、表示設定、追加・削除ができます。<br>
+            <span style="color:#e02424;">※キー名はスプレッドシートの列名と一致させてください。</span>
+        </p>
+        
+        <div id="settings-list" style="flex:1; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:15px;">
+            </div>
+
+        <div style="margin-bottom:15px;">
+            <button id="add-setting-btn" style="width:100%; padding:10px; border:2px dashed #ddd; background:#fafafa; color:#666; border-radius:8px; cursor:pointer; font-weight:bold; transition:all 0.2s;">
+                <i class="fa-solid fa-plus"></i> 新しい項目を追加
+            </button>
+        </div>
+
+        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;">
+            <button id="save-settings-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                保存して反映
+            </button>
+        </div>
     </div>
 </div>
-
-<div id="upload-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:30px; box-shadow:0 10px 25px rgba(0,0,0,0.2); text-align:center;">
-        <h3 style="margin-bottom:10px; color:var(--text-main);">日計表AIインポート</h3>
-        <p style="font-size:13px; color:#666; margin-bottom:20px;">日計表の写真やPDF、Excelのスクリーンショットをアップロードしてください。<br>AIが数値を読み取り、自動入力します。</p>
-        <div id="drop-area" style="border:2px dashed #ccc; border-radius:10px; padding:30px; margin-bottom:20px; cursor:pointer; background:#fafafa; transition:all 0.2s;"><i class="fa-solid fa-file-image" style="font-size:40px; color:#ccc; margin-bottom:10px;"></i><p style="font-size:14px; color:#999; margin:0;">ここにファイルをドラッグ<br>またはクリックして選択</p><input type="file" id="file-input" accept="image/*,application/pdf" style="display:none;"></div>
-        <div id="preview-area" style="display:none; margin-bottom:20px;"><p id="file-name" style="font-size:12px; font-weight:bold; color:#333;"></p></div>
-        <button id="upload-execute-btn" disabled style="background:#ccc; color:white; border:none; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:not-allowed; width:100%;">AI解析スタート</button>
-        <button id="close-upload-btn" style="margin-top:15px; border:none; background:none; color:#666; font-size:13px; cursor:pointer; text-decoration:underline;">キャンセル</button>
-    </div>
-</div>
-
-<div id="input-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:white; width:600px; max-width:95%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 style="margin:0;">日次データ入力</h3><button id="close-input-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button></div>
-        <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-weight:bold; color:var(--text-main);"><label>対象日:</label><input type="date" id="input-target-date" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-family:inherit; font-size:16px; color:var(--text-main);"></div>
-        <p style="font-size:12px; color:#666; margin-bottom:10px;">数値を入力して保存してください。既存のデータがある場合は上書きされます。</p>
-        <div id="input-form-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:15px; overflow-y:auto; padding:5px; flex:1;"></div>
-        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px; margin-top:15px;"><button id="save-input-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-save"></i> 保存する</button></div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCPWYzP72y42Kle1Q-MDQjUdlnPlDyifxc",
-        authDomain: "decmo-hills--demo.firebaseapp.com",
-        projectId: "decmo-hills--demo",
-        storageBucket: "decmo-hills--demo.firebasestorage.app",
-        messagingSenderId: "166692708725",
-        appId: "1:166692708725:web:dc13314d3b98216f12733c",
-        measurementId: "G-TJPQT3H28R"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    const loginBtn = document.getElementById('google-login-btn');
-    if(loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch((error) => {
-                console.error("Login Error:", error);
-                alert("ログインに失敗しました");
-            });
-        });
-    }
-
-    const logoutBtn = document.getElementById('logout-btn');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            if(confirm('ログアウトしますか？')) {
-                signOut(auth).then(() => {
-                    window.location.reload();
-                });
-            }
-        });
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            const userNameElem = document.querySelector('.user-name');
-            if(userNameElem) userNameElem.textContent = user.displayName;
-            
-            if (user.photoURL) {
-                const avatarDiv = document.querySelector('.user-avatar');
-                if (avatarDiv) {
-                    avatarDiv.innerHTML = `<img src="${user.photoURL}" alt="User" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                }
-            }
-
-            try {
-                const token = await user.getIdToken();
-                if (typeof window.startApp === 'function') {
-                    window.startApp(token);
-                } else {
-                    setTimeout(() => {
-                       if (typeof window.startApp === 'function') window.startApp(token);
-                    }, 500);
-                }
-            } catch(e) {
-                console.error("Token error:", e);
-            }
-        } else {
-            document.getElementById('login-overlay').style.display = 'flex';
-        }
-    });
-</script>
 
 <script src="script.js"></script>
+
+<script type="module">
+  // Firebase SDKのインポート
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  // ★変更点: signOut を追加でインポート
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  // Firebase構成設定
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPWYzP72y42Kle1Q-MDQjUdlnPlDyifxc",
+    authDomain: "decmo-hills--demo.firebaseapp.com",
+    projectId: "decmo-hills--demo",
+    storageBucket: "decmo-hills--demo.firebasestorage.app",
+    messagingSenderId: "166692708725",
+    appId: "1:166692708725:web:dc13314d3b98216f12733c",
+    measurementId: "G-TJPQT3H28R"
+  };
+
+  // Firebase初期化
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // --- ログイン処理 ---
+  const loginBtn = document.getElementById('login-btn');
+  if(loginBtn) {
+      loginBtn.addEventListener('click', () => {
+        signInWithPopup(auth, provider)
+          .catch((error) => {
+            console.error("Login Failed:", error);
+            const errorMsg = document.getElementById('login-error');
+            errorMsg.textContent = "ログインに失敗しました: " + error.message;
+            errorMsg.style.display = 'block';
+          });
+      });
+  }
+
+  // --- ★追加: ログアウト処理 ---
+  const logoutBtn = document.getElementById('logout-btn');
+  if(logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+          if(confirm('ログアウトしますか？')) {
+              signOut(auth).then(() => {
+                  // ログアウト成功時
+                  console.log("Logged out");
+                  // ページをリロードして初期状態（ログイン画面）に戻すのが最も安全です
+                  window.location.reload();
+              }).catch((error) => {
+                  console.error("Logout Error:", error);
+                  alert("ログアウトに失敗しました");
+              });
+          }
+      });
+  }
+
+  // --- 認証状態の監視 ---
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // ログイン成功時
+      console.log("Logged in as:", user.email);
+      document.getElementById('login-overlay').style.display = 'none';
+      
+      const userNameElem = document.querySelector('.user-name');
+      if(userNameElem) userNameElem.textContent = user.displayName;
+      
+      try {
+          const token = await user.getIdToken();
+          if (typeof window.startApp === 'function') {
+              window.startApp(token);
+          } else {
+              // script.jsのロード待ちリトライ
+              setTimeout(() => {
+                 if (typeof window.startApp === 'function') window.startApp(token);
+              }, 500);
+          }
+      } catch(e) {
+          console.error("Token error:", e);
+      }
+      
+    } else {
+      // 未ログイン時（またはログアウト後）
+      document.getElementById('login-overlay').style.display = 'flex';
+    }
+  });
+</script>
+
 </body>
 </html>
