@@ -92,6 +92,13 @@
                     <span>エンゲージメント</span>
                 </a>
             </li>
+            
+            <li class="menu-item">
+                <a href="#" data-target="ai-agent">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>AIエージェント</span>
+                </a>
+            </li>
         </ul>
 
         <div class="sidebar-footer">
@@ -131,6 +138,10 @@
                 <button id="open-upload-btn" title="日計表を読み込む" style="margin-left:10px; border:none; background:white; color:var(--accent-blue); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                 </button>
+                
+                <button id="open-input-btn" title="手動で数値を入力" style="margin-left:10px; border:none; background:white; color:var(--text-sub); width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
             </div>
         </header>
 
@@ -138,35 +149,25 @@
             
             <div id="page-dashboard">
                 <div id="kpi-top-container" class="kpi-grid"></div>
-
                 <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-blue); padding-left: 10px;">詳細集計</h3>
                 <div id="kpi-sub-container" class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 30px;"></div>
-
                 <div class="charts-grid">
                     <div class="card chart-card wide">
-                        <div class="card-header">
-                            <h3>月次推移</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="salesChart"></canvas>
-                        </div>
+                        <div class="card-header"><h3>月次推移</h3></div>
+                        <div class="chart-container"><canvas id="salesChart"></canvas></div>
                     </div>
                 </div>
-
                 <div class="ai-message-area" style="margin-top: 30px; margin-bottom: 50px;">
                     <div class="ai-card" style="display: flex; gap: 20px; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); align-items: flex-start;">
-                        
                         <div class="ai-avatar" style="flex-shrink: 0; text-align: center;">
                             <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #0ea5e9); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
                                 <i class="fa-solid fa-robot" style="font-size: 30px; color: white;"></i>
                             </div>
                             <span style="font-size: 11px; font-weight: bold; color: var(--accent-blue);">DeCMo AI</span>
                         </div>
-
                         <div class="ai-content" style="flex: 1;">
                             <h4 style="margin: 0 0 10px 0; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid fa-sparkles" style="color: var(--accent-orange);"></i> 
-                                今月の経営アドバイス
+                                <i class="fa-solid fa-sparkles" style="color: var(--accent-orange);"></i> 今月の経営アドバイス
                             </h4>
                             <div id="ai-text-body" style="font-size: 14px; line-height: 1.6; color: var(--text-main); background: #f8fafc; padding: 15px; border-radius: 0 12px 12px 12px; border-left: 4px solid var(--accent-blue);">
                                 データを集計中です...
@@ -177,106 +178,97 @@
             </div>
 
             <div id="page-goals" style="display:none;">
-                
                 <div class="card" style="padding: 30px; margin-bottom: 30px; border-left: 5px solid #8b5cf6;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 style="margin:0; font-size:18px; color:var(--text-main); display:flex; align-items:center; gap:10px;">
-                            <i class="fa-solid fa-flag" style="color:#8b5cf6;"></i> 医院理念・Mission
-                        </h3>
-                        <button style="border:none; background:none; color:var(--text-sub); cursor:pointer; font-size:14px;"><i class="fa-solid fa-pen"></i> 編集</button>
+                        <h3 style="margin:0; font-size:18px; color:var(--text-main);"><i class="fa-solid fa-flag" style="margin-right:10px; color:#8b5cf6;"></i>医院理念・Mission</h3>
+                        <button style="border:none; background:none; color:var(--text-sub); cursor:pointer;"><i class="fa-solid fa-pen"></i> 編集</button>
                     </div>
-                    <p style="font-size:18px; font-weight:bold; color:#1e293b; line-height:1.8; text-align:center;">
-                        「患者様の生涯の健康パートナーとして、<br>
-                        心からの笑顔と安心を提供する歯科医院を目指す」
-                    </p>
+                    <p style="font-size:18px; font-weight:bold; color:#1e293b; line-height:1.8; text-align:center;">「患者様の生涯の健康パートナーとして、<br>心からの笑顔と安心を提供する歯科医院を目指す」</p>
                 </div>
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-solid fa-users"></i></div><div class="card-info"><h3>ユニット1台生産性/月</h3><p class="value">250万円</p><span class="trend flat">目標: 300万円</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon green"><i class="fa-solid fa-clock"></i></div><div class="card-info"><h3>人時生産性</h3><p class="value">15,625円</p><span class="trend flat">目標: 10,000円</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon orange"><i class="fa-solid fa-user-nurse"></i></div><div class="card-info"><h3>スタッフ1人生産性</h3><p class="value">150万円</p><span class="trend flat">目標: 120万円</span></div></div>
+                </div>
+            </div>
 
-                <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-blue); padding-left: 10px;">経営リソースと生産性目標</h3>
-                
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-bottom:30px;">
-                    <div class="card" style="padding: 20px;">
-                        <h4 style="margin:0 0 15px 0; color:var(--text-sub); font-size:14px; border-bottom:1px solid #eee; padding-bottom:10px;">リソース情報</h4>
-                        <div style="display:flex; flex-direction:column; gap:15px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <label style="font-size:13px; color:var(--text-main);">ユニット台数</label>
-                                <div style="font-weight:bold;">3 <span style="font-size:11px; color:#999;">台</span></div>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <label style="font-size:13px; color:var(--text-main);">スタッフ数</label>
-                                <div style="font-weight:bold;">5 <span style="font-size:11px; color:#999;">人</span></div>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <label style="font-size:13px; color:var(--text-main);">月間診療時間</label>
-                                <div style="font-weight:bold;">160 <span style="font-size:11px; color:#999;">時間</span></div>
-                            </div>
-                        </div>
-                    </div>
+            <div id="page-accounting" style="display:none;">
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-solid fa-yen-sign"></i></div><div class="card-info"><h3>今月医業収入</h3><p class="value">1,250万円</p><span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 前月比 +5.2%</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon orange"><i class="fa-solid fa-users-gear"></i></div><div class="card-info"><h3>人件費率</h3><p class="value">22.5%</p><span class="trend flat">適正範囲内</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon green"><i class="fa-solid fa-chart-simple"></i></div><div class="card-info"><h3>営業利益</h3><p class="value">450万円</p><span class="trend up">利益率 36%</span></div></div>
+                </div>
+                <div class="card chart-card wide" style="margin-top:20px;">
+                    <div class="card-header"><h3>月次損益推移 (P/L)</h3></div>
+                    <div class="chart-container"><canvas id="accountingChart"></canvas></div>
+                </div>
+            </div>
 
-                    <div class="card" style="padding: 20px; background: linear-gradient(to bottom right, #ffffff, #f8fafc);">
-                        <h4 style="margin:0 0 15px 0; color:var(--text-sub); font-size:14px; border-bottom:1px solid #eee; padding-bottom:10px;">生産性KPI (目標値)</h4>
-                        <div style="display:flex; flex-direction:column; gap:12px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <div style="font-size:13px; font-weight:bold; color:var(--text-main);">ユニット1台生産性</div>
-                                    <div style="font-size:10px; color:#999;">目標: 300万円/月</div>
-                                </div>
-                                <span style="font-size:18px; font-weight:bold; color:var(--accent-blue);">250<span style="font-size:12px;">万円</span></span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <div style="font-size:13px; font-weight:bold; color:var(--text-main);">人時生産性</div>
-                                    <div style="font-size:10px; color:#999;">目標: 10,000円/時</div>
-                                </div>
-                                <span style="font-size:18px; font-weight:bold; color:var(--accent-green);">15,625<span style="font-size:12px;">円</span></span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <div style="font-size:13px; font-weight:bold; color:var(--text-main);">スタッフ1人生産性</div>
-                                    <div style="font-size:10px; color:#999;">目標: 120万円/月</div>
-                                </div>
-                                <span style="font-size:18px; font-weight:bold; color:var(--accent-orange);">150<span style="font-size:12px;">万円</span></span>
-                            </div>
-                        </div>
+            <div id="page-phr" style="display:none;">
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon green"><i class="fa-solid fa-mobile-screen"></i></div><div class="card-info"><h3>アプリ登録者数</h3><p class="value" id="kpi-sales">0</p><span class="trend up">人</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-solid fa-comment-medical"></i></div><div class="card-info"><h3>今月の診断通知</h3><p class="value" id="kpi-visitors">0</p><span class="trend up">件</span></div></div>
+                </div>
+                <div style="padding:20px; text-align:center; color:#999; margin-top:50px;">
+                    <i class="fa-solid fa-heart-pulse" style="font-size:48px; margin-bottom:20px;"></i>
+                    <p>詳細なPHRデータは連携APIを通じてここに表示されます。</p>
+                </div>
+            </div>
+
+            <div id="page-satisfaction" style="display:none;">
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon purple"><i class="fa-solid fa-star"></i></div><div class="card-info"><h3>NPS (推奨度)</h3><p class="value">+45</p><span class="trend up">業界平均 +10</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-brands fa-google"></i></div><div class="card-info"><h3>Google口コミ</h3><p class="value">4.8</p><span class="trend flat">全120件</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon orange"><i class="fa-solid fa-stopwatch"></i></div><div class="card-info"><h3>平均待ち時間</h3><p class="value">8分</p><span class="trend down">前月比 -2分(改善)</span></div></div>
+                </div>
+                <div class="card" style="margin-top:20px; padding:20px;">
+                    <h3 style="margin-bottom:15px; color:var(--text-sub);">患者アンケート集計</h3>
+                    <div style="display:flex; flex-direction:column; gap:15px;">
+                        <div><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;"><span>治療の説明は分かりやすかったですか？</span><strong>92%</strong></div><div style="height:10px; background:#f3f4f6; border-radius:5px;"><div style="width:92%; height:100%; background:var(--accent-blue); border-radius:5px;"></div></div></div>
+                        <div><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;"><span>スタッフの対応は丁寧でしたか？</span><strong>88%</strong></div><div style="height:10px; background:#f3f4f6; border-radius:5px;"><div style="width:88%; height:100%; background:var(--accent-green); border-radius:5px;"></div></div></div>
+                        <div><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;"><span>痛みへの配慮はありましたか？</span><strong>85%</strong></div><div style="height:10px; background:#f3f4f6; border-radius:5px;"><div style="width:85%; height:100%; background:var(--accent-orange); border-radius:5px;"></div></div></div>
                     </div>
                 </div>
+            </div>
 
-                <h3 style="font-size: 16px; color: var(--text-sub); margin-bottom: 15px; border-left: 4px solid var(--accent-green); padding-left: 10px;">戦略アクションプラン</h3>
-                
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
-                    <div class="card" style="padding:20px;">
-                        <h4 style="margin:0 0 15px 0; color:var(--text-main); font-size:15px; border-bottom:2px solid #ecfdf5; padding-bottom:5px;">
-                            <i class="fa-solid fa-stethoscope" style="color:var(--accent-green); margin-right:5px;"></i> 診療効率・質
-                        </h4>
-                        <div style="display:flex; flex-direction:column; gap:10px;">
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox" checked> 応対マニュアルの整備</label>
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox"> アポイント帳の空き枠対策</label>
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox" checked> 診療理念MTGの実施</label>
-                        </div>
-                    </div>
+            <div id="page-marketing" style="display:none;">
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon green"><i class="fa-solid fa-user-plus"></i></div><div class="card-info"><h3>今月の新患数</h3><p class="value">45人</p><span class="trend up">Web予約率 65%</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-solid fa-bullseye"></i></div><div class="card-info"><h3>CPA (獲得単価)</h3><p class="value">3,500円</p><span class="trend down">前月比 -500円</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon orange"><i class="fa-solid fa-rotate-right"></i></div><div class="card-info"><h3>リコール率</h3><p class="value">82%</p><span class="trend flat">目標 80%</span></div></div>
+                </div>
+                <div class="card chart-card wide" style="margin-top:20px;">
+                    <div class="card-header"><h3>新患来院経路</h3></div>
+                    <div class="chart-container"><canvas id="marketingChart"></canvas></div>
+                </div>
+            </div>
 
-                    <div class="card" style="padding:20px;">
-                        <h4 style="margin:0 0 15px 0; color:var(--text-main); font-size:15px; border-bottom:2px solid #eff6ff; padding-bottom:5px;">
-                            <i class="fa-solid fa-comments-dollar" style="color:var(--accent-blue); margin-right:5px;"></i> 自費率向上
-                        </h4>
-                        <div style="display:flex; flex-direction:column; gap:10px;">
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox" checked> 全新患への補綴カウンセリング</label>
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox"> 自費移行率の分析</label>
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox"> カウンセリングのロールプレイング</label>
-                        </div>
-                    </div>
-
-                    <div class="card" style="padding:20px;">
-                        <h4 style="margin:0 0 15px 0; color:var(--text-main); font-size:15px; border-bottom:2px solid #fff7ed; padding-bottom:5px;">
-                            <i class="fa-solid fa-bullhorn" style="color:var(--accent-orange); margin-right:5px;"></i> 増患・集患
-                        </h4>
-                        <div style="display:flex; flex-direction:column; gap:10px;">
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox" checked> HP・SNSの定期更新</label>
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox"> 口コミ対策・MEO</label>
-                            <label style="display:flex; gap:10px; align-items:center; font-size:13px; cursor:pointer;"><input type="checkbox"> リコール率の向上施策</label>
-                        </div>
+            <div id="page-recruitment" style="display:none;">
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-solid fa-briefcase"></i></div><div class="card-info"><h3>求人応募数</h3><p class="value">12件</p><span class="trend up">前月比 +4</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon green"><i class="fa-solid fa-handshake"></i></div><div class="card-info"><h3>面接設定率</h3><p class="value">80%</p><span class="trend flat">10件実施予定</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon orange"><i class="fa-solid fa-wallet"></i></div><div class="card-info"><h3>採用コスト</h3><p class="value">15万円</p><span class="trend flat">今月累計</span></div></div>
+                </div>
+                <div class="card" style="margin-top:20px; padding:20px;">
+                    <h3 style="margin-bottom:15px; color:var(--text-sub);">採用パイプライン</h3>
+                    <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px;">
+                        <div style="min-width:200px; background:#f8fafc; padding:15px; border-radius:8px;"><h4 style="font-size:14px; margin-bottom:10px; color:#64748b;">応募 (3)</h4><div style="background:white; padding:10px; border-radius:6px; margin-bottom:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1); font-size:13px;">歯科衛生士 Aさん</div><div style="background:white; padding:10px; border-radius:6px; margin-bottom:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1); font-size:13px;">歯科助手 Bさん</div></div>
+                        <div style="min-width:200px; background:#f8fafc; padding:15px; border-radius:8px;"><h4 style="font-size:14px; margin-bottom:10px; color:#3b82f6;">面接調整中 (2)</h4><div style="background:white; padding:10px; border-radius:6px; margin-bottom:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1); font-size:13px;">歯科医師 C先生</div></div>
+                        <div style="min-width:200px; background:#f8fafc; padding:15px; border-radius:8px;"><h4 style="font-size:14px; margin-bottom:10px; color:#10b981;">内定・承諾 (1)</h4><div style="background:white; padding:10px; border-radius:6px; margin-bottom:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1); font-size:13px;">受付 Dさん</div></div>
                     </div>
                 </div>
+            </div>
 
+            <div id="page-engagement" style="display:none;">
+                <div class="kpi-grid">
+                    <div class="card kpi-card"><div class="card-icon purple"><i class="fa-solid fa-heart"></i></div><div class="card-info"><h3>eNPS (満足度)</h3><p class="value">24</p><span class="trend up">改善傾向</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon orange"><i class="fa-solid fa-clock-rotate-left"></i></div><div class="card-info"><h3>平均残業時間</h3><p class="value">5.2h</p><span class="trend down">前月比 -1.5h</span></div></div>
+                    <div class="card kpi-card"><div class="card-icon blue"><i class="fa-solid fa-umbrella-beach"></i></div><div class="card-info"><h3>有休消化率</h3><p class="value">75%</p><span class="trend flat">年間平均</span></div></div>
+                </div>
+                <div class="card chart-card wide" style="margin-top:20px;">
+                    <div class="card-header"><h3>スタッフ満足度推移</h3></div>
+                    <div class="chart-container"><canvas id="engagementChart"></canvas></div>
+                </div>
             </div>
 
         </div>
@@ -289,54 +281,31 @@
             <h3 style="margin:0;">KPI項目設定</h3>
             <button id="close-settings-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
         </div>
-        
-        <p style="font-size:12px; color:#666; margin-bottom:10px;">
-            項目の並べ替え、表示設定、追加・削除ができます。<br>
-            <span style="color:#e02424;">※キー名はスプレッドシートの列名と一致させてください。</span>
-        </p>
-        
-        <div id="settings-list" style="flex:1; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:15px;">
-            </div>
-
-        <div style="margin-bottom:15px;">
-            <button id="add-setting-btn" style="width:100%; padding:10px; border:2px dashed #ddd; background:#fafafa; color:#666; border-radius:8px; cursor:pointer; font-weight:bold; transition:all 0.2s;">
-                <i class="fa-solid fa-plus"></i> 新しい項目を追加
-            </button>
-        </div>
-
-        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;">
-            <button id="save-settings-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                保存して反映
-            </button>
-        </div>
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">項目の並べ替え、表示設定、追加・削除ができます。<span style="color:#e02424;">※キー名はスプレッドシートの列名と一致させてください。</span></p>
+        <div id="settings-list" style="flex:1; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:15px;"></div>
+        <div style="margin-bottom:15px;"><button id="add-setting-btn" style="width:100%; padding:10px; border:2px dashed #ddd; background:#fafafa; color:#666; border-radius:8px; cursor:pointer; font-weight:bold; transition:all 0.2s;"><i class="fa-solid fa-plus"></i> 新しい項目を追加</button></div>
+        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;"><button id="save-settings-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);">保存して反映</button></div>
     </div>
 </div>
 
 <div id="upload-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:30px; box-shadow:0 10px 25px rgba(0,0,0,0.2); text-align:center;">
         <h3 style="margin-bottom:10px; color:var(--text-main);">日計表AIインポート</h3>
-        <p style="font-size:13px; color:#666; margin-bottom:20px;">
-            日計表の写真やPDF、Excelのスクリーンショットをアップロードしてください。<br>
-            AIが数値を読み取り、自動入力します。
-        </p>
-        
-        <div id="drop-area" style="border:2px dashed #ccc; border-radius:10px; padding:30px; margin-bottom:20px; cursor:pointer; background:#fafafa; transition:all 0.2s;">
-            <i class="fa-solid fa-file-image" style="font-size:40px; color:#ccc; margin-bottom:10px;"></i>
-            <p style="font-size:14px; color:#999; margin:0;">ここにファイルをドラッグ<br>またはクリックして選択</p>
-            <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none;">
-        </div>
+        <p style="font-size:13px; color:#666; margin-bottom:20px;">日計表の写真やPDF、Excelのスクリーンショットをアップロードしてください。<br>AIが数値を読み取り、自動入力します。</p>
+        <div id="drop-area" style="border:2px dashed #ccc; border-radius:10px; padding:30px; margin-bottom:20px; cursor:pointer; background:#fafafa; transition:all 0.2s;"><i class="fa-solid fa-file-image" style="font-size:40px; color:#ccc; margin-bottom:10px;"></i><p style="font-size:14px; color:#999; margin:0;">ここにファイルをドラッグ<br>またはクリックして選択</p><input type="file" id="file-input" accept="image/*,application/pdf" style="display:none;"></div>
+        <div id="preview-area" style="display:none; margin-bottom:20px;"><p id="file-name" style="font-size:12px; font-weight:bold; color:#333;"></p></div>
+        <button id="upload-execute-btn" disabled style="background:#ccc; color:white; border:none; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:not-allowed; width:100%;">AI解析スタート</button>
+        <button id="close-upload-btn" style="margin-top:15px; border:none; background:none; color:#666; font-size:13px; cursor:pointer; text-decoration:underline;">キャンセル</button>
+    </div>
+</div>
 
-        <div id="preview-area" style="display:none; margin-bottom:20px;">
-            <p id="file-name" style="font-size:12px; font-weight:bold; color:#333;"></p>
-        </div>
-
-        <button id="upload-execute-btn" disabled style="background:#ccc; color:white; border:none; padding:12px 30px; border-radius:6px; font-weight:bold; cursor:not-allowed; width:100%;">
-            AI解析スタート
-        </button>
-        
-        <button id="close-upload-btn" style="margin-top:15px; border:none; background:none; color:#666; font-size:13px; cursor:pointer; text-decoration:underline;">
-            キャンセル
-        </button>
+<div id="input-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; width:600px; max-width:95%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 style="margin:0;">日次データ入力</h3><button id="close-input-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button></div>
+        <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-weight:bold; color:var(--text-main);"><label>対象日:</label><input type="date" id="input-target-date" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-family:inherit; font-size:16px; color:var(--text-main);"></div>
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">数値を入力して保存してください。既存のデータがある場合は上書きされます。</p>
+        <div id="input-form-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:15px; overflow-y:auto; padding:5px; flex:1;"></div>
+        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px; margin-top:15px;"><button id="save-input-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-save"></i> 保存する</button></div>
     </div>
 </div>
 
@@ -363,13 +332,12 @@
   const loginBtn = document.getElementById('login-btn');
   if(loginBtn) {
       loginBtn.addEventListener('click', () => {
-        signInWithPopup(auth, provider)
-          .catch((error) => {
+        signInWithPopup(auth, provider).catch((error) => {
             console.error("Login Failed:", error);
             const errorMsg = document.getElementById('login-error');
             errorMsg.textContent = "ログインに失敗しました: " + error.message;
             errorMsg.style.display = 'block';
-          });
+        });
       });
   }
 
@@ -390,9 +358,12 @@
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       document.getElementById('login-overlay').style.display = 'none';
-      
       const userNameElem = document.querySelector('.user-name');
       if(userNameElem) userNameElem.textContent = user.displayName;
+      if (user.photoURL) {
+          const avatarDiv = document.querySelector('.user-info .avatar');
+          if (avatarDiv) avatarDiv.innerHTML = `<img src="${user.photoURL}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+      }
       
       try {
           const token = await user.getIdToken();
@@ -406,7 +377,6 @@
       } catch(e) {
           console.error("Token error:", e);
       }
-      
     } else {
       document.getElementById('login-overlay').style.display = 'flex';
     }
