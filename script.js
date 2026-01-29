@@ -91,8 +91,6 @@ function initMenu() {
     const menuItems = document.querySelectorAll('.menu-item');
     const pageTitle = document.getElementById('page-title');
     const topBarControls = document.querySelector('.top-bar-controls');
-    const aiNewsHeader = document.getElementById('recruit-ai-news-header');
-    const mediaLinksHeader = document.getElementById('recruit-media-links-header'); // ★追加
 
     const pageIds = [
         'page-dashboard', 'page-goals', 'page-accounting', 
@@ -124,16 +122,6 @@ function initMenu() {
                 topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
             }
 
-            // AIニュース制御
-            if(aiNewsHeader) {
-                aiNewsHeader.style.display = (target === 'recruitment') ? 'flex' : 'none';
-            }
-            
-            // ★追加: 媒体リンクパネル制御
-            if(mediaLinksHeader) {
-                mediaLinksHeader.style.display = (target === 'recruitment') ? 'flex' : 'none';
-            }
-
             // ターゲットページ表示
             const targetPage = document.getElementById('page-' + target);
             if (targetPage) targetPage.style.display = 'block';
@@ -154,12 +142,19 @@ function initMenu() {
 // 採用ページロジック
 // =================================================================
 function initRecruitmentFunctions() {
-    // 媒体編集
+    // 媒体編集 (ここがリンク集の編集も兼ねる)
     const mediaModal = document.getElementById('recruitment-edit-modal');
+    // グラフの編集ボタン
     document.getElementById('edit-recruitment-btn').addEventListener('click', () => {
         renderMediaEditList();
         mediaModal.style.display = 'flex';
     });
+    // ★追加: リンクカードの編集ボタンも同じモーダルを開く
+    document.getElementById('btn-edit-media-links').addEventListener('click', () => {
+        renderMediaEditList();
+        mediaModal.style.display = 'flex';
+    });
+
     document.getElementById('close-recruitment-btn').addEventListener('click', () => mediaModal.style.display = 'none');
     document.getElementById('add-recruitment-btn').addEventListener('click', () => {
         document.getElementById('recruitment-list').appendChild(createMediaRow('', 0, '', '#94a3b8'));
@@ -293,32 +288,17 @@ function renderJobList() {
 }
 
 function renderMediaLinks() {
-    // 既存の下部エリア用
-    const containerBottom = document.getElementById('media-links-area');
-    // ★追加: ヘッダー用
-    const containerHeader = document.getElementById('recruit-media-links-header');
-    
-    if(containerBottom) containerBottom.innerHTML = '';
-    if(containerHeader) containerHeader.innerHTML = '';
-
+    const container = document.getElementById('recruit-media-links-card-body');
+    if(!container) return;
+    container.innerHTML = '';
     recruitmentData.forEach(media => {
         if(media.url) {
-            // 下部用（既存のデザイン）
-            const htmlBottom = `
-                <a href="${media.url}" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:5px; background:white; padding:5px 10px; border:1px solid #eee; border-radius:20px; font-size:12px; color:#555; transition:all 0.2s;">
-                    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${media.color};"></span>
-                    ${media.label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px; color:#999;"></i>
-                </a>
-            `;
-            if(containerBottom) containerBottom.insertAdjacentHTML('beforeend', htmlBottom);
-
-            // ★追加: ヘッダー用（コンパクトボタン）
-            const htmlHeader = `
-                <a href="${media.url}" target="_blank" style="text-decoration:none; background:${media.color}; color:white; padding:4px 10px; border-radius:15px; font-size:11px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1); opacity:0.9; transition:opacity 0.2s;">
+            const html = `
+                <a href="${media.url}" target="_blank" style="text-decoration:none; background:${media.color}; color:white; padding:8px 15px; border-radius:20px; font-size:12px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1); opacity:0.9; transition:all 0.2s; display:inline-flex; align-items:center; gap:5px;">
                     ${media.label} <i class="fa-solid fa-external-link-alt" style="font-size:10px;"></i>
                 </a>
             `;
-            if(containerHeader) containerHeader.insertAdjacentHTML('beforeend', htmlHeader);
+            container.insertAdjacentHTML('beforeend', html);
         }
     });
 }
