@@ -41,10 +41,7 @@ window.startApp = function(token) {
     initSettingsModal();
     initUploadModal(); 
     initInputModal(); 
-    
-    // 採用ページ関連の初期化とイベント設定
-    initRecruitmentFunctions(); 
-    
+    initRecruitmentFunctions(); // 採用ページ用初期化
     fetchData('getSales'); 
 };
 
@@ -93,6 +90,7 @@ function initMenu() {
     const menuItems = document.querySelectorAll('.menu-item');
     const pageTitle = document.getElementById('page-title');
     const topBarControls = document.querySelector('.top-bar-controls');
+    const aiNewsHeader = document.getElementById('recruit-ai-news-header');
 
     const pageIds = [
         'page-dashboard', 'page-goals', 'page-accounting', 
@@ -113,18 +111,27 @@ function initMenu() {
             
             if(pageTitle) pageTitle.textContent = text;
 
+            // ページ表示切り替え
             pageIds.forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.style.display = 'none';
             });
 
+            // ヘッダーコントロール制御
             if(topBarControls) {
                 topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
             }
 
+            // AIニュース制御
+            if(aiNewsHeader) {
+                aiNewsHeader.style.display = (target === 'recruitment') ? 'flex' : 'none';
+            }
+
+            // ターゲットページ表示
             const targetPage = document.getElementById('page-' + target);
             if (targetPage) targetPage.style.display = 'block';
 
+            // データ取得トリガー
             if (target === 'dashboard') fetchData('getSales');
             else if (target === 'phr') fetchData('getPhr');
             else if (target === 'recruitment') renderRecruitmentPage(); 
@@ -137,10 +144,10 @@ function initMenu() {
 }
 
 // =================================================================
-// 採用ページロジック (イベントリスナー設定)
+// 採用ページロジック
 // =================================================================
 function initRecruitmentFunctions() {
-    // --- 1. 媒体編集 ---
+    // 1. 媒体編集イベント
     const mediaModal = document.getElementById('recruitment-edit-modal');
     document.getElementById('edit-recruitment-btn').addEventListener('click', () => {
         renderMediaEditList();
@@ -148,8 +155,7 @@ function initRecruitmentFunctions() {
     });
     document.getElementById('close-recruitment-btn').addEventListener('click', () => mediaModal.style.display = 'none');
     document.getElementById('add-recruitment-btn').addEventListener('click', () => {
-        const listArea = document.getElementById('recruitment-list');
-        listArea.appendChild(createMediaRow('', 0, '', '#94a3b8'));
+        document.getElementById('recruitment-list').appendChild(createMediaRow('', 0, '', '#94a3b8'));
     });
     document.getElementById('save-recruitment-btn').addEventListener('click', () => {
         saveMediaData();
@@ -157,7 +163,7 @@ function initRecruitmentFunctions() {
         renderRecruitmentPage();
     });
 
-    // --- 2. KPI編集 ---
+    // 2. KPI編集イベント
     const kpiModal = document.getElementById('recruit-kpi-modal');
     document.getElementById('btn-edit-recruit-kpi').addEventListener('click', () => {
         document.getElementById('edit-kpi-applicants').value = recruitKPI.applicants;
@@ -176,7 +182,7 @@ function initRecruitmentFunctions() {
         kpiModal.style.display = 'none';
     });
 
-    // --- 3. パイプライン編集 ---
+    // 3. パイプライン編集イベント
     const pipeModal = document.getElementById('pipeline-modal');
     document.getElementById('btn-edit-pipeline').addEventListener('click', () => {
         renderPipelineEditList();
@@ -189,7 +195,7 @@ function initRecruitmentFunctions() {
         pipeModal.style.display = 'none';
     });
 
-    // --- 4. 募集要項編集 ---
+    // 4. 募集要項編集イベント
     const jobModal = document.getElementById('job-modal');
     document.getElementById('btn-edit-jobs').addEventListener('click', () => {
         renderJobEditList();
@@ -197,8 +203,7 @@ function initRecruitmentFunctions() {
     });
     document.getElementById('close-job-modal').addEventListener('click', () => jobModal.style.display = 'none');
     document.getElementById('add-job-btn').addEventListener('click', () => {
-        const list = document.getElementById('job-edit-list');
-        list.insertAdjacentHTML('beforeend', createJobEditRow('', '', '募集中'));
+        document.getElementById('job-edit-list').insertAdjacentHTML('beforeend', createJobEditRow('', '', '募集中'));
     });
     document.getElementById('save-job-btn').addEventListener('click', () => {
         saveJobData();
@@ -207,107 +212,7 @@ function initRecruitmentFunctions() {
     });
 }
 
-// --- ヘルパー関数群 ---
-
-// 媒体編集用
-function renderMediaEditList() {
-    const listArea = document.getElementById('recruitment-list');
-    listArea.innerHTML = '';
-    recruitmentData.forEach(item => {
-        listArea.appendChild(createMediaRow(item.label, item.value, item.url, item.color));
-    });
-}
-function createMediaRow(label, val, url, color) {
-    const div = document.createElement('div');
-    div.className = 'media-edit-row';
-    div.style.cssText = "display:flex; gap:5px; margin-bottom:5px; align-items:center;";
-    div.innerHTML = `
-        <input type="text" value="${label}" class="edit-label" style="border:1px solid #ddd; padding:5px; border-radius:4px; flex:1;" placeholder="媒体名">
-        <input type="number" value="${val}" class="edit-val" style="border:1px solid #ddd; padding:5px; border-radius:4px; width:50px;" placeholder="数">
-        <input type="text" value="${url || ''}" class="edit-url" style="border:1px solid #ddd; padding:5px; border-radius:4px; flex:1;" placeholder="URL">
-        <input type="color" value="${color}" class="edit-color" style="border:none; width:30px; height:30px; cursor:pointer;">
-        <button class="btn-del" style="border:none; background:none; color:#e02424; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-    `;
-    div.querySelector('.btn-del').addEventListener('click', () => div.remove());
-    return div;
-}
-function saveMediaData() {
-    const rows = document.querySelectorAll('.media-edit-row');
-    const newData = [];
-    rows.forEach(row => {
-        const label = row.querySelector('.edit-label').value;
-        const val = Number(row.querySelector('.edit-val').value);
-        const url = row.querySelector('.edit-url').value;
-        const col = row.querySelector('.edit-color').value;
-        if(label) newData.push({ label: label, value: val, color: col, url: url });
-    });
-    recruitmentData = newData;
-}
-
-// パイプライン編集用
-function renderPipelineEditList() {
-    const container = document.getElementById('pipeline-edit-list');
-    container.innerHTML = '';
-    recruitPipeline.forEach((stage, index) => {
-        container.innerHTML += `
-            <div class="pipe-edit-row" style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
-                <div style="font-weight:bold; margin-bottom:5px;">${stage.name}</div>
-                <div style="display:flex; gap:10px; margin-bottom:5px;">
-                    <label>人数:</label><input type="number" class="pp-count" value="${stage.count}" style="width:50px; border:1px solid #ddd;">
-                </div>
-                <div style="display:flex; flex-direction:column; gap:5px;">
-                    <label>候補者 (カンマ区切り):</label>
-                    <textarea class="pp-cands" style="width:100%; border:1px solid #ddd; height:50px;">${stage.candidates.join(',')}</textarea>
-                </div>
-            </div>
-        `;
-    });
-}
-function savePipelineData() {
-    const rows = document.querySelectorAll('.pipe-edit-row');
-    rows.forEach((row, i) => {
-        recruitPipeline[i].count = row.querySelector('.pp-count').value;
-        const txt = row.querySelector('.pp-cands').value;
-        recruitPipeline[i].candidates = txt ? txt.split(',') : [];
-    });
-}
-
-// 募集要項編集用
-function renderJobEditList() {
-    const container = document.getElementById('job-edit-list');
-    container.innerHTML = '';
-    jobPostings.forEach(job => {
-        container.insertAdjacentHTML('beforeend', createJobEditRow(job.title, job.sub, job.status));
-    });
-}
-function createJobEditRow(title, sub, status) {
-    return `
-        <div class="job-row" style="display:flex; gap:5px; margin-bottom:10px; align-items:center;">
-            <div style="flex:1;">
-                <input type="text" class="job-title" value="${title}" placeholder="職種" style="width:100%; border:1px solid #ddd; margin-bottom:2px;">
-                <input type="text" class="job-sub" value="${sub}" placeholder="詳細" style="width:100%; border:1px solid #ddd; font-size:11px;">
-            </div>
-            <select class="job-status" style="border:1px solid #ddd;">
-                <option value="募集中" ${status==='募集中'?'selected':''}>募集中</option>
-                <option value="充足停止" ${status==='充足停止'?'selected':''}>停止中</option>
-            </select>
-            <button onclick="this.parentElement.remove()" style="border:none; color:red; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-        </div>
-    `;
-}
-function saveJobData() {
-    const rows = document.querySelectorAll('.job-row');
-    const newData = [];
-    rows.forEach(row => {
-        const title = row.querySelector('.job-title').value;
-        const sub = row.querySelector('.job-sub').value;
-        const status = row.querySelector('.job-status').value;
-        if(title) newData.push({ title, sub, status });
-    });
-    jobPostings = newData;
-}
-
-// 描画系
+// 描画関数群
 function renderRecruitmentPage() {
     renderRecruitmentChart();
     renderRecruitKPI();
@@ -331,13 +236,18 @@ function updateRecruitNews() {
 }
 
 function renderRecruitKPI() {
-    document.getElementById('disp-recruit-count').innerHTML = `${recruitKPI.applicants}<span style="font-size:14px; color:#999; font-weight:normal;">件</span> / ${recruitKPI.hires}<span style="font-size:14px; color:#999; font-weight:normal;">名</span>`;
-    document.getElementById('disp-recruit-cpa').innerHTML = `${recruitKPI.cpa}<span style="font-size:14px; color:#999; font-weight:normal;">万円</span>`;
-    document.getElementById('disp-recruit-rate').innerHTML = `${recruitKPI.rate}<span style="font-size:14px; color:#999; font-weight:normal;">%</span>`;
+    const appEl = document.getElementById('disp-recruit-count');
+    const cpaEl = document.getElementById('disp-recruit-cpa');
+    const rateEl = document.getElementById('disp-recruit-rate');
+    
+    if(appEl) appEl.innerHTML = `${recruitKPI.applicants}<span style="font-size:14px; color:#999; font-weight:normal;">件</span> / ${recruitKPI.hires}<span style="font-size:14px; color:#999; font-weight:normal;">名</span>`;
+    if(cpaEl) cpaEl.innerHTML = `${recruitKPI.cpa}<span style="font-size:14px; color:#999; font-weight:normal;">万円</span>`;
+    if(rateEl) rateEl.innerHTML = `${recruitKPI.rate}<span style="font-size:14px; color:#999; font-weight:normal;">%</span>`;
 }
 
 function renderPipeline() {
     const container = document.getElementById('pipeline-container');
+    if(!container) return;
     container.innerHTML = '';
     recruitPipeline.forEach(stage => {
         let candidatesHtml = '';
@@ -359,6 +269,7 @@ function renderPipeline() {
 
 function renderJobList() {
     const container = document.getElementById('job-list-container');
+    if(!container) return;
     container.innerHTML = '';
     jobPostings.forEach(job => {
         const bg = job.status === '募集中' ? '#eff6ff' : '#f3f4f6';
@@ -378,6 +289,7 @@ function renderJobList() {
 
 function renderMediaLinks() {
     const container = document.getElementById('media-links-area');
+    if(!container) return;
     container.innerHTML = '';
     recruitmentData.forEach(media => {
         if(media.url) {
@@ -416,7 +328,103 @@ function renderRecruitmentChart() {
     });
 }
 
-// 簡易グラフ描画関数 (他ページ用)
+// 編集ヘルパー関数
+function renderMediaEditList() {
+    const listArea = document.getElementById('recruitment-list');
+    listArea.innerHTML = '';
+    recruitmentData.forEach(item => {
+        listArea.appendChild(createMediaRow(item.label, item.value, item.url, item.color));
+    });
+}
+function createMediaRow(label, val, url, color) {
+    const div = document.createElement('div');
+    div.className = 'media-edit-row';
+    div.style.cssText = "display:flex; gap:5px; margin-bottom:5px; align-items:center;";
+    div.innerHTML = `
+        <input type="text" value="${label}" class="edit-label" style="border:1px solid #ddd; padding:5px; border-radius:4px; flex:1;" placeholder="媒体名">
+        <input type="number" value="${val}" class="edit-val" style="border:1px solid #ddd; padding:5px; border-radius:4px; width:50px;" placeholder="数">
+        <input type="text" value="${url || ''}" class="edit-url" style="border:1px solid #ddd; padding:5px; border-radius:4px; flex:1;" placeholder="URL">
+        <input type="color" value="${color}" class="edit-color" style="border:none; width:30px; height:30px; cursor:pointer;">
+        <button class="btn-del" style="border:none; background:none; color:#e02424; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+    `;
+    div.querySelector('.btn-del').addEventListener('click', () => div.remove());
+    return div;
+}
+function saveMediaData() {
+    const rows = document.querySelectorAll('.media-edit-row');
+    const newData = [];
+    rows.forEach(row => {
+        const label = row.querySelector('.edit-label').value;
+        const val = Number(row.querySelector('.edit-val').value);
+        const url = row.querySelector('.edit-url').value;
+        const col = row.querySelector('.edit-color').value;
+        if(label) newData.push({ label: label, value: val, color: col, url: url });
+    });
+    recruitmentData = newData;
+}
+
+function renderPipelineEditList() {
+    const container = document.getElementById('pipeline-edit-list');
+    container.innerHTML = '';
+    recruitPipeline.forEach((stage, index) => {
+        container.innerHTML += `
+            <div class="pipe-edit-row" style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                <div style="font-weight:bold; margin-bottom:5px;">${stage.name}</div>
+                <div style="display:flex; gap:10px; margin-bottom:5px;">
+                    <label>人数:</label><input type="number" class="pp-count" value="${stage.count}" style="width:50px; border:1px solid #ddd;">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label>候補者 (カンマ区切り):</label>
+                    <textarea class="pp-cands" style="width:100%; border:1px solid #ddd; height:50px;">${stage.candidates.join(',')}</textarea>
+                </div>
+            </div>
+        `;
+    });
+}
+function savePipelineData() {
+    const rows = document.querySelectorAll('.pipe-edit-row');
+    rows.forEach((row, i) => {
+        recruitPipeline[i].count = row.querySelector('.pp-count').value;
+        const txt = row.querySelector('.pp-cands').value;
+        recruitPipeline[i].candidates = txt ? txt.split(',') : [];
+    });
+}
+
+function renderJobEditList() {
+    const container = document.getElementById('job-edit-list');
+    container.innerHTML = '';
+    jobPostings.forEach(job => {
+        container.insertAdjacentHTML('beforeend', createJobEditRow(job.title, job.sub, job.status));
+    });
+}
+function createJobEditRow(title, sub, status) {
+    return `
+        <div class="job-row" style="display:flex; gap:5px; margin-bottom:10px; align-items:center;">
+            <div style="flex:1;">
+                <input type="text" class="job-title" value="${title}" placeholder="職種" style="width:100%; border:1px solid #ddd; margin-bottom:2px;">
+                <input type="text" class="job-sub" value="${sub}" placeholder="詳細" style="width:100%; border:1px solid #ddd; font-size:11px;">
+            </div>
+            <select class="job-status" style="border:1px solid #ddd;">
+                <option value="募集中" ${status==='募集中'?'selected':''}>募集中</option>
+                <option value="充足停止" ${status==='充足停止'?'selected':''}>停止中</option>
+            </select>
+            <button onclick="this.parentElement.remove()" style="border:none; color:red; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `;
+}
+function saveJobData() {
+    const rows = document.querySelectorAll('.job-row');
+    const newData = [];
+    rows.forEach(row => {
+        const title = row.querySelector('.job-title').value;
+        const sub = row.querySelector('.job-sub').value;
+        const status = row.querySelector('.job-status').value;
+        if(title) newData.push({ title, sub, status });
+    });
+    jobPostings = newData;
+}
+
+// 簡易グラフ描画 (他ページ)
 function renderDummyChart(canvasId, type, label, labels, data, color) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -429,7 +437,7 @@ function renderDummyChart(canvasId, type, label, labels, data, color) {
     });
 }
 
-// 既存の設定系関数 (省略せず維持)
+// 既存機能 (設定、アップロード、手入力) - 変更なし
 function initSettingsModal() { const modal = document.getElementById('settings-modal'); const openBtn = document.getElementById('open-settings-btn'); const closeBtn = document.getElementById('close-settings-btn'); const saveBtn = document.getElementById('save-settings-btn'); const addBtn = document.getElementById('add-setting-btn'); if(openBtn) openBtn.addEventListener('click', () => { renderSettingsList(); modal.style.display = 'flex'; }); if(closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; }); if(saveBtn) saveBtn.addEventListener('click', saveSettings); if(addBtn) addBtn.addEventListener('click', addSettingItem); }
 function renderSettingsList() { const list = document.getElementById('settings-list'); list.innerHTML = ''; currentConfig.forEach((item, index) => { const div = document.createElement('div'); div.style.cssText = "display:flex; align-items:center; padding:10px; border-bottom:1px solid #f0f0f0; background:white; gap:10px;"; div.innerHTML = ` <div style="color:#ccc; cursor:grab; font-size:14px;"><i class="fa-solid fa-bars"></i></div> <div style="flex:1;"> <div style="display:flex; gap:5px; margin-bottom:4px;"> <input type="text" class="setting-label" value="${item.label}" data-index="${index}" placeholder="表示名" style="border:1px solid #ddd; padding:4px 8px; border-radius:4px; font-weight:bold; width:100%;"> </div> <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#888;"> <span>Key:</span><input type="text" class="setting-key" value="${item.key}" data-index="${index}" placeholder="列名" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:100px;"> <span>Icon:</span><input type="text" class="setting-icon" value="${item.icon}" data-index="${index}" placeholder="fa-xx" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:80px;"> </div> </div> <select class="setting-pos" data-index="${index}" style="padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;"> <option value="top" ${item.position === 'top' ? 'selected' : ''}>上段</option> <option value="sub" ${item.position === 'sub' ? 'selected' : ''}>下段</option> <option value="hidden" ${item.position === 'hidden' ? 'selected' : ''}>非表示</option> </select> <div style="display:flex; flex-direction:column; gap:2px;"> <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▲</button> <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▼</button> </div> <button onclick="deleteSettingItem(${index})" style="border:none; background:none; cursor:pointer; color:#e02424; margin-left:5px; font-size:14px;"><i class="fa-solid fa-trash-can"></i></button> `; list.appendChild(div); }); }
 function addSettingItem() { currentConfig.push({ key: 'new_column', label: '新しい項目', icon: 'fa-circle', color: 'blue', format: 'number', position: 'sub' }); renderSettingsList(); const list = document.getElementById('settings-list'); setTimeout(() => list.scrollTop = list.scrollHeight, 0); }
