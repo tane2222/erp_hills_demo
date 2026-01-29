@@ -7,6 +7,14 @@ let currentToken = "";
 let selectedDate = new Date();
 let currentConfig = []; 
 
+// 採用データ (編集可能にするため変数化)
+let recruitmentData = [
+    { label: 'グッピー', value: 5, color: '#3b82f6' },
+    { label: 'ジョブメドレー', value: 3, color: '#10b981' },
+    { label: 'Indeed', value: 2, color: '#f59e0b' },
+    { label: '紹介会社', value: 2, color: '#8b5cf6' }
+];
+
 // =================================================================
 // アプリケーション開始処理
 // =================================================================
@@ -18,6 +26,7 @@ window.startApp = function(token) {
     initSettingsModal();
     initUploadModal(); 
     initInputModal(); 
+    initRecruitmentModal(); // ★追加
     fetchData('getSales'); 
 };
 
@@ -79,7 +88,6 @@ function initMenu() {
     const pageTitle = document.getElementById('page-title');
     const topBarControls = document.querySelector('.top-bar-controls');
 
-    // 全てのページIDリスト
     const pageIds = [
         'page-dashboard', 'page-goals', 'page-accounting', 
         'page-phr', 'page-satisfaction', 'page-marketing', 
@@ -90,7 +98,6 @@ function initMenu() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // アクティブクラスの切り替え
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             
@@ -100,24 +107,20 @@ function initMenu() {
             
             if(pageTitle) pageTitle.textContent = text;
 
-            // すべてのページを非表示にする
             pageIds.forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.style.display = 'none';
             });
 
-            // ダッシュボード専用コントロールの表示切替
             if(topBarControls) {
                 topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
             }
 
-            // ターゲットに応じた表示
             const targetPage = document.getElementById('page-' + target);
             if (targetPage) {
                 targetPage.style.display = 'block';
             }
 
-            // データ取得やグラフ描画のトリガー
             if (target === 'dashboard') {
                 fetchData('getSales');
             } else if (target === 'phr') {
@@ -127,7 +130,7 @@ function initMenu() {
             } else if (target === 'marketing') {
                 renderDummyChart('marketingChart', 'doughnut', '来院経路', ['HP', 'Google', '紹介', '看板', 'その他'], [30, 20, 15, 25, 10], ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8']);
             } else if (target === 'recruitment') {
-                renderDummyChart('recruitmentChart', 'bar', '媒体別応募数', ['グッピー', 'ジョブメドレー', 'Indeed', '紹介会社'], [5, 3, 2, 2], ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']);
+                renderRecruitmentChart(); // ★変更: 専用の描画関数を呼び出し
             } else if (target === 'engagement') {
                 renderDummyChart('engagementChart', 'line', '満足度推移', ['4月', '5月', '6月', '7月', '8月', '9月'], [20, 22, 21, 24, 23, 24], '#8b5cf6');
             } else if (target === 'ai-agent') {
@@ -137,7 +140,134 @@ function initMenu() {
     });
 }
 
-// 簡易グラフ描画関数 (Chart.js)
+// =================================================================
+// 採用ページ専用のグラフ描画 (グラデーション・モダン化)
+// =================================================================
+function renderRecruitmentChart() {
+    const canvas = document.getElementById('recruitmentChart');
+    if (!canvas) return;
+    
+    const chartStatus = Chart.getChart(canvas);
+    if (chartStatus) chartStatus.destroy();
+
+    const ctx = canvas.getContext('2d');
+    const labels = recruitmentData.map(d => d.label);
+    const data = recruitmentData.map(d => d.value);
+    
+    // グラデーション生成ロジック
+    const backgroundColors = recruitmentData.map(d => {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, d.color); // 上部は濃い色
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)'); // 下部は薄く
+        return gradient;
+    });
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '応募数',
+                data: data,
+                backgroundColor: backgroundColors,
+                borderWidth: 0, // 輪郭線なし
+                borderRadius: 5, // 角丸
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                x: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// =================================================================
+// 採用データ編集モーダル制御
+// =================================================================
+function initRecruitmentModal() {
+    const modal = document.getElementById('recruitment-edit-modal');
+    const openBtn = document.getElementById('edit-recruitment-btn');
+    const closeBtn = document.getElementById('close-recruitment-btn');
+    const addBtn = document.getElementById('add-recruitment-btn');
+    const saveBtn = document.getElementById('save-recruitment-btn');
+    const listArea = document.getElementById('recruitment-list');
+
+    // データ一時保存用
+    let tempRecruitmentData = [];
+
+    if(openBtn) {
+        openBtn.addEventListener('click', () => {
+            // 現在のデータをコピー
+            tempRecruitmentData = JSON.parse(JSON.stringify(recruitmentData));
+            renderList();
+            modal.style.display = 'flex';
+        });
+    }
+
+    if(closeBtn) {
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    }
+
+    // リスト描画
+    function renderList() {
+        listArea.innerHTML = '';
+        tempRecruitmentData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.cssText = "display:flex; gap:5px; margin-bottom:5px; align-items:center;";
+            div.innerHTML = `
+                <input type="text" value="${item.label}" class="edit-label" data-index="${index}" style="border:1px solid #ddd; padding:5px; border-radius:4px; flex:1;" placeholder="媒体名">
+                <input type="number" value="${item.value}" class="edit-val" data-index="${index}" style="border:1px solid #ddd; padding:5px; border-radius:4px; width:60px;" placeholder="数">
+                <input type="color" value="${item.color}" class="edit-color" data-index="${index}" style="border:none; width:30px; height:30px; cursor:pointer;">
+                <button onclick="removeRecruitItem(${index})" style="border:none; background:none; color:#e02424; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+            `;
+            listArea.appendChild(div);
+        });
+    }
+
+    // 追加ボタン
+    if(addBtn) {
+        addBtn.addEventListener('click', () => {
+            tempRecruitmentData.push({ label: '新規媒体', value: 0, color: '#94a3b8' });
+            renderList();
+        });
+    }
+
+    // 削除用グローバル関数
+    window.removeRecruitItem = function(index) {
+        tempRecruitmentData.splice(index, 1);
+        renderList();
+    };
+
+    // 保存ボタン
+    if(saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            // 入力値の反映
+            const rows = listArea.children;
+            const newData = [];
+            for(let i=0; i<rows.length; i++) {
+                const label = rows[i].querySelector('.edit-label').value;
+                const val = Number(rows[i].querySelector('.edit-val').value);
+                const col = rows[i].querySelector('.edit-color').value;
+                if(label) {
+                    newData.push({ label: label, value: val, color: col });
+                }
+            }
+            recruitmentData = newData; // データ更新
+            renderRecruitmentChart(); // グラフ再描画
+            modal.style.display = 'none';
+        });
+    }
+}
+
+// 簡易グラフ描画関数 (Chart.js) - 他のページ用
 function renderDummyChart(canvasId, type, label, labels, data, color) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
