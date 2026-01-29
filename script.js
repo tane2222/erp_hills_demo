@@ -123,11 +123,13 @@ function initMenu() {
             } else if (target === 'phr') {
                 fetchData('getPhr');
             } else if (target === 'accounting') {
-                renderDummyChart('accountingChart', 'bar', '月次損益', [450, 480, 420, 500, 450, 470], 'rgba(59, 130, 246, 0.6)');
+                renderDummyChart('accountingChart', 'bar', '月次損益', ['4月', '5月', '6月', '7月', '8月', '9月'], [450, 480, 420, 500, 450, 470], 'rgba(59, 130, 246, 0.6)');
             } else if (target === 'marketing') {
-                renderDummyChart('marketingChart', 'doughnut', '来院経路', [30, 20, 15, 25, 10], ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8']);
+                renderDummyChart('marketingChart', 'doughnut', '来院経路', ['HP', 'Google', '紹介', '看板', 'その他'], [30, 20, 15, 25, 10], ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8']);
+            } else if (target === 'recruitment') {
+                renderDummyChart('recruitmentChart', 'bar', '媒体別応募数', ['グッピー', 'ジョブメドレー', 'Indeed', '紹介会社'], [5, 3, 2, 2], ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']);
             } else if (target === 'engagement') {
-                renderDummyChart('engagementChart', 'line', '満足度推移', [20, 22, 21, 24, 23, 24], '#8b5cf6');
+                renderDummyChart('engagementChart', 'line', '満足度推移', ['4月', '5月', '6月', '7月', '8月', '9月'], [20, 22, 21, 24, 23, 24], '#8b5cf6');
             } else if (target === 'ai-agent') {
                 alert('AIエージェント機能は現在準備中です。');
             }
@@ -136,7 +138,7 @@ function initMenu() {
 }
 
 // 簡易グラフ描画関数 (Chart.js)
-function renderDummyChart(canvasId, type, label, data, color) {
+function renderDummyChart(canvasId, type, label, labels, data, color) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     
@@ -147,7 +149,7 @@ function renderDummyChart(canvasId, type, label, data, color) {
     new Chart(canvas, {
         type: type,
         data: {
-            labels: ['4月', '5月', '6月', '7月', '8月', '9月'], // ダミーラベル
+            labels: labels,
             datasets: [{
                 label: label,
                 data: data,
