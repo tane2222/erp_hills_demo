@@ -56,13 +56,18 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <div style="display:flex; align-items:center; gap:15px;">
-                <h2 id="page-title">診療数値ダッシュボード</h2>
+            <div style="display:flex; align-items:center; gap:15px; flex:1;">
+                <h2 id="page-title" style="white-space:nowrap;">診療数値ダッシュボード</h2>
                 
-                <div id="recruit-ai-news-header" style="display:none; background:white; border:1px solid #e2e8f0; padding:5px 15px; border-radius:20px; align-items:center; gap:8px; font-size:12px; color:#475569; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-                    <i class="fa-solid fa-robot" style="color:var(--accent-purple);"></i>
-                    <span style="font-weight:bold; color:var(--accent-purple);">AI News:</span>
-                    <span id="recruitment-news-text" style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">分析中...</span>
+                <div id="recruit-ai-news-header" style="display:none; background:white; border:1px solid #e2e8f0; padding:5px 15px; border-radius:20px; align-items:center; gap:10px; font-size:12px; color:#475569; box-shadow:0 1px 2px rgba(0,0,0,0.05); flex:1; max-width:800px;">
+                    <div style="flex-shrink:0; display:flex; align-items:center; gap:5px;">
+                        <i class="fa-solid fa-robot" style="color:var(--accent-purple);"></i>
+                        <span style="font-weight:bold; color:var(--accent-purple);">AI News:</span>
+                    </div>
+                    <span id="recruitment-news-text" style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500;">分析中...</span>
+                    <a id="recruitment-news-link" href="#" target="_blank" style="flex-shrink:0; color:var(--accent-blue); text-decoration:none; font-weight:bold; font-size:11px; border:1px solid var(--accent-blue); padding:2px 10px; border-radius:12px; transition:all 0.2s; display:flex; align-items:center; gap:3px;">
+                        詳しく見る <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
                 </div>
             </div>
             
@@ -132,7 +137,8 @@
                             <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 前月比 +4件</span>
                         </div>
                     </div>
-                    <div class="card kpi-card">
+                    <div class="card kpi-card" style="position:relative;">
+                        <button onclick="openRecruitKPIModal()" style="position:absolute; top:10px; right:10px; border:none; background:none; color:#ccc; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
                         <div class="card-icon orange"><i class="fa-solid fa-wallet"></i></div>
                         <div class="card-info">
                             <h3>平均採用単価 (CPA)</h3>
@@ -140,7 +146,8 @@
                             <span class="trend flat"><i class="fa-solid fa-minus"></i> 予算内</span>
                         </div>
                     </div>
-                    <div class="card kpi-card">
+                    <div class="card kpi-card" style="position:relative;">
+                        <button onclick="openRecruitKPIModal()" style="position:absolute; top:10px; right:10px; border:none; background:none; color:#ccc; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
                         <div class="card-icon green"><i class="fa-solid fa-filter"></i></div>
                         <div class="card-info">
                             <h3>選考歩留まり率</h3>
