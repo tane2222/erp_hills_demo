@@ -126,7 +126,7 @@
 
                 <div class="kpi-grid">
                     <div class="card kpi-card" style="position:relative;">
-                        <button onclick="openRecruitKPIModal()" style="position:absolute; top:10px; right:10px; border:none; background:none; color:#ccc; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
+                        <button id="btn-edit-recruit-kpi" style="position:absolute; top:10px; right:10px; border:none; background:none; color:#ccc; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
                         <div class="card-icon blue"><i class="fa-solid fa-users-viewfinder"></i></div>
                         <div class="card-info">
                             <h3>今月の応募 / 採用</h3>
@@ -134,8 +134,7 @@
                             <span class="trend up"><i class="fa-solid fa-arrow-trend-up"></i> 前月比 +4件</span>
                         </div>
                     </div>
-                    <div class="card kpi-card" style="position:relative;">
-                        <button onclick="openRecruitKPIModal()" style="position:absolute; top:10px; right:10px; border:none; background:none; color:#ccc; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
+                    <div class="card kpi-card">
                         <div class="card-icon orange"><i class="fa-solid fa-wallet"></i></div>
                         <div class="card-info">
                             <h3>平均採用単価 (CPA)</h3>
@@ -143,8 +142,7 @@
                             <span class="trend flat"><i class="fa-solid fa-minus"></i> 予算内</span>
                         </div>
                     </div>
-                    <div class="card kpi-card" style="position:relative;">
-                        <button onclick="openRecruitKPIModal()" style="position:absolute; top:10px; right:10px; border:none; background:none; color:#ccc; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
+                    <div class="card kpi-card">
                         <div class="card-icon green"><i class="fa-solid fa-filter"></i></div>
                         <div class="card-info">
                             <h3>選考歩留まり率</h3>
@@ -156,7 +154,7 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 15px 0;">
                     <h3 style="font-size:16px; color:var(--text-sub); border-left:4px solid var(--accent-blue); padding-left:10px; margin:0;">採用パイプライン</h3>
-                    <button onclick="openPipelineModal()" style="border:none; background:none; color:#666; cursor:pointer; font-size:13px;"><i class="fa-solid fa-pen"></i> 編集</button>
+                    <button id="btn-edit-pipeline" style="border:none; background:none; color:#666; cursor:pointer; font-size:13px;"><i class="fa-solid fa-pen"></i> 編集</button>
                 </div>
                 <div id="pipeline-container" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
                     </div>
@@ -178,7 +176,7 @@
                     <div class="card" style="min-height: 300px; padding: 20px;">
                         <div class="card-header">
                             <h3>募集要項ステータス</h3>
-                            <button onclick="openJobModal()" style="border:none; background:none; cursor:pointer; color:#666; font-size:13px;">
+                            <button id="btn-edit-jobs" style="border:none; background:none; cursor:pointer; color:#666; font-size:13px;">
                                 <i class="fa-solid fa-pen"></i> 編集
                             </button>
                         </div>
@@ -218,7 +216,7 @@
     <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0;">採用KPI編集</h3>
-            <button onclick="document.getElementById('recruit-kpi-modal').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+            <button id="close-kpi-modal" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:15px;">
             <div><label style="font-size:12px; color:#666;">応募数</label><input type="number" id="edit-kpi-applicants" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;"></div>
@@ -227,7 +225,7 @@
             <div><label style="font-size:12px; color:#666;">歩留まり率(%)</label><input type="number" id="edit-kpi-rate" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;"></div>
         </div>
         <div style="text-align:right; margin-top:20px;">
-            <button onclick="saveRecruitKPI()" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">保存</button>
+            <button id="save-kpi-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">保存</button>
         </div>
     </div>
 </div>
@@ -236,11 +234,11 @@
     <div style="background:white; width:600px; max-width:90%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0;">パイプライン編集</h3>
-            <button onclick="document.getElementById('pipeline-modal').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+            <button id="close-pipeline-modal" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
         </div>
         <div id="pipeline-edit-list" style="flex:1; overflow-y:auto; padding:5px;"></div>
         <div style="text-align:right; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
-            <button onclick="savePipeline()" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">保存</button>
+            <button id="save-pipeline-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">保存</button>
         </div>
     </div>
 </div>
@@ -249,14 +247,14 @@
     <div style="background:white; width:500px; max-width:90%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="margin:0;">募集要項ステータス編集</h3>
-            <button onclick="document.getElementById('job-modal').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+            <button id="close-job-modal" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
         </div>
         <div id="job-edit-list" style="flex:1; overflow-y:auto; padding:5px;"></div>
         <div style="margin-top:10px;">
-            <button onclick="addJobItem()" style="width:100%; padding:8px; border:1px dashed #ddd; background:#fafafa; color:#666; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fa-solid fa-plus"></i> 追加</button>
+            <button id="add-job-btn" style="width:100%; padding:8px; border:1px dashed #ddd; background:#fafafa; color:#666; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fa-solid fa-plus"></i> 追加</button>
         </div>
         <div style="text-align:right; margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
-            <button onclick="saveJobs()" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">保存</button>
+            <button id="save-job-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">保存</button>
         </div>
     </div>
 </div>
