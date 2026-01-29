@@ -41,7 +41,8 @@ window.startApp = function(token) {
     initSettingsModal();
     initUploadModal(); 
     initInputModal(); 
-    initRecruitmentFunctions(); // 採用ページ用初期化
+    initRecruitmentFunctions(); 
+    updateRecruitNews(); // 初回実行
     fetchData('getSales'); 
 };
 
@@ -147,7 +148,7 @@ function initMenu() {
 // 採用ページロジック
 // =================================================================
 function initRecruitmentFunctions() {
-    // 1. 媒体編集イベント
+    // 媒体データ
     const mediaModal = document.getElementById('recruitment-edit-modal');
     document.getElementById('edit-recruitment-btn').addEventListener('click', () => {
         renderMediaEditList();
@@ -163,7 +164,7 @@ function initRecruitmentFunctions() {
         renderRecruitmentPage();
     });
 
-    // 2. KPI編集イベント
+    // KPI編集
     const kpiModal = document.getElementById('recruit-kpi-modal');
     document.getElementById('btn-edit-recruit-kpi').addEventListener('click', () => {
         document.getElementById('edit-kpi-applicants').value = recruitKPI.applicants;
@@ -182,7 +183,7 @@ function initRecruitmentFunctions() {
         kpiModal.style.display = 'none';
     });
 
-    // 3. パイプライン編集イベント
+    // パイプライン編集
     const pipeModal = document.getElementById('pipeline-modal');
     document.getElementById('btn-edit-pipeline').addEventListener('click', () => {
         renderPipelineEditList();
@@ -195,7 +196,7 @@ function initRecruitmentFunctions() {
         pipeModal.style.display = 'none';
     });
 
-    // 4. 募集要項編集イベント
+    // 募集要項編集
     const jobModal = document.getElementById('job-modal');
     document.getElementById('btn-edit-jobs').addEventListener('click', () => {
         renderJobEditList();
@@ -212,42 +213,39 @@ function initRecruitmentFunctions() {
     });
 }
 
-// 描画関数群
 function renderRecruitmentPage() {
     renderRecruitmentChart();
     renderRecruitKPI();
     renderPipeline();
     renderJobList();
     renderMediaLinks();
-    updateRecruitNews();
 }
 
 function updateRecruitNews() {
-    const news = [
-        "2026年診療報酬改定に向け、DHの有効求人倍率が高止まり傾向にあります。",
-        "都市部では紹介会社経由の採用コストが平均50万円を超えています。",
-        "若手DHへのアピールには、Instagramのリール動画が効果的です。"
+    const newsData = [
+        { text: "2026年診療報酬改定に向け、DHの有効求人倍率が高止まり傾向にあります。", url: "https://www.mhlw.go.jp/" },
+        { text: "都市部では紹介会社経由の採用コストが平均50万円を超えています。", url: "https://www.google.com/search?q=歯科採用コスト" },
+        { text: "若手DHへのアピールには、Instagramのリール動画が効果的です。", url: "https://www.instagram.com/" },
+        { text: "オンライン面接の導入で、地方出身者の応募率が20%向上する事例が増えています。", url: "https://zoom.us/" }
     ];
-    const elem = document.getElementById('recruitment-news-text');
-    if(elem && !elem.dataset.updated) {
-        elem.textContent = news[Math.floor(Math.random() * news.length)];
-        elem.dataset.updated = "true";
+    const elemText = document.getElementById('recruitment-news-text');
+    const elemLink = document.getElementById('recruitment-news-link');
+    if(elemText && elemLink && !elemText.dataset.updated) {
+        const randomNews = newsData[Math.floor(Math.random() * newsData.length)];
+        elemText.textContent = randomNews.text;
+        elemLink.href = randomNews.url;
+        elemText.dataset.updated = "true";
     }
 }
 
 function renderRecruitKPI() {
-    const appEl = document.getElementById('disp-recruit-count');
-    const cpaEl = document.getElementById('disp-recruit-cpa');
-    const rateEl = document.getElementById('disp-recruit-rate');
-    
-    if(appEl) appEl.innerHTML = `${recruitKPI.applicants}<span style="font-size:14px; color:#999; font-weight:normal;">件</span> / ${recruitKPI.hires}<span style="font-size:14px; color:#999; font-weight:normal;">名</span>`;
-    if(cpaEl) cpaEl.innerHTML = `${recruitKPI.cpa}<span style="font-size:14px; color:#999; font-weight:normal;">万円</span>`;
-    if(rateEl) rateEl.innerHTML = `${recruitKPI.rate}<span style="font-size:14px; color:#999; font-weight:normal;">%</span>`;
+    document.getElementById('disp-recruit-count').innerHTML = `${recruitKPI.applicants}<span style="font-size:14px; color:#999; font-weight:normal;">件</span> / ${recruitKPI.hires}<span style="font-size:14px; color:#999; font-weight:normal;">名</span>`;
+    document.getElementById('disp-recruit-cpa').innerHTML = `${recruitKPI.cpa}<span style="font-size:14px; color:#999; font-weight:normal;">万円</span>`;
+    document.getElementById('disp-recruit-rate').innerHTML = `${recruitKPI.rate}<span style="font-size:14px; color:#999; font-weight:normal;">%</span>`;
 }
 
 function renderPipeline() {
     const container = document.getElementById('pipeline-container');
-    if(!container) return;
     container.innerHTML = '';
     recruitPipeline.forEach(stage => {
         let candidatesHtml = '';
@@ -269,7 +267,6 @@ function renderPipeline() {
 
 function renderJobList() {
     const container = document.getElementById('job-list-container');
-    if(!container) return;
     container.innerHTML = '';
     jobPostings.forEach(job => {
         const bg = job.status === '募集中' ? '#eff6ff' : '#f3f4f6';
@@ -289,7 +286,6 @@ function renderJobList() {
 
 function renderMediaLinks() {
     const container = document.getElementById('media-links-area');
-    if(!container) return;
     container.innerHTML = '';
     recruitmentData.forEach(media => {
         if(media.url) {
@@ -437,7 +433,7 @@ function renderDummyChart(canvasId, type, label, labels, data, color) {
     });
 }
 
-// 既存機能 (設定、アップロード、手入力) - 変更なし
+// 既存機能 (変更なし)
 function initSettingsModal() { const modal = document.getElementById('settings-modal'); const openBtn = document.getElementById('open-settings-btn'); const closeBtn = document.getElementById('close-settings-btn'); const saveBtn = document.getElementById('save-settings-btn'); const addBtn = document.getElementById('add-setting-btn'); if(openBtn) openBtn.addEventListener('click', () => { renderSettingsList(); modal.style.display = 'flex'; }); if(closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; }); if(saveBtn) saveBtn.addEventListener('click', saveSettings); if(addBtn) addBtn.addEventListener('click', addSettingItem); }
 function renderSettingsList() { const list = document.getElementById('settings-list'); list.innerHTML = ''; currentConfig.forEach((item, index) => { const div = document.createElement('div'); div.style.cssText = "display:flex; align-items:center; padding:10px; border-bottom:1px solid #f0f0f0; background:white; gap:10px;"; div.innerHTML = ` <div style="color:#ccc; cursor:grab; font-size:14px;"><i class="fa-solid fa-bars"></i></div> <div style="flex:1;"> <div style="display:flex; gap:5px; margin-bottom:4px;"> <input type="text" class="setting-label" value="${item.label}" data-index="${index}" placeholder="表示名" style="border:1px solid #ddd; padding:4px 8px; border-radius:4px; font-weight:bold; width:100%;"> </div> <div style="display:flex; align-items:center; gap:5px; font-size:11px; color:#888;"> <span>Key:</span><input type="text" class="setting-key" value="${item.key}" data-index="${index}" placeholder="列名" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:100px;"> <span>Icon:</span><input type="text" class="setting-icon" value="${item.icon}" data-index="${index}" placeholder="fa-xx" style="border:none; background:#f9f9f9; padding:2px 4px; border-radius:3px; color:#666; width:80px;"> </div> </div> <select class="setting-pos" data-index="${index}" style="padding:5px; border:1px solid #ddd; border-radius:4px; font-size:12px;"> <option value="top" ${item.position === 'top' ? 'selected' : ''}>上段</option> <option value="sub" ${item.position === 'sub' ? 'selected' : ''}>下段</option> <option value="hidden" ${item.position === 'hidden' ? 'selected' : ''}>非表示</option> </select> <div style="display:flex; flex-direction:column; gap:2px;"> <button onclick="moveItem(${index}, -1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▲</button> <button onclick="moveItem(${index}, 1)" style="border:none; background:none; cursor:pointer; color:#888; font-size:10px;">▼</button> </div> <button onclick="deleteSettingItem(${index})" style="border:none; background:none; cursor:pointer; color:#e02424; margin-left:5px; font-size:14px;"><i class="fa-solid fa-trash-can"></i></button> `; list.appendChild(div); }); }
 function addSettingItem() { currentConfig.push({ key: 'new_column', label: '新しい項目', icon: 'fa-circle', color: 'blue', format: 'number', position: 'sub' }); renderSettingsList(); const list = document.getElementById('settings-list'); setTimeout(() => list.scrollTop = list.scrollHeight, 0); }
