@@ -323,6 +323,9 @@
                     <div class="card chart-card" style="min-height: 300px;">
                         <div class="card-header">
                             <h3>媒体別パフォーマンス</h3>
+                            <button id="edit-recruitment-btn" style="border:none; background:none; cursor:pointer; color:#666; font-size:13px;">
+                                <i class="fa-solid fa-pen"></i> 編集
+                            </button>
                         </div>
                         <div class="chart-container">
                             <canvas id="recruitmentChart"></canvas>
@@ -373,6 +376,32 @@
 
         </div>
     </main>
+</div>
+
+<div id="recruitment-edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; width:400px; max-width:90%; border-radius:12px; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.2); display:flex; flex-direction:column; max-height:90vh;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">媒体別データ編集</h3>
+            <button id="close-recruitment-btn" style="border:none; background:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+        </div>
+        
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">グラフに表示する媒体と応募数を編集します。</p>
+        
+        <div id="recruitment-list" style="flex:1; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:15px;">
+            </div>
+
+        <div style="margin-bottom:15px;">
+            <button id="add-recruitment-btn" style="width:100%; padding:8px; border:1px dashed #ddd; background:#fafafa; color:#666; border-radius:6px; cursor:pointer; font-size:13px;">
+                <i class="fa-solid fa-plus"></i> 項目を追加
+            </button>
+        </div>
+
+        <div style="text-align:right; border-top:1px solid #eee; padding-top:15px;">
+            <button id="save-recruitment-btn" style="background:var(--accent-blue); color:white; border:none; padding:10px 25px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                保存して反映
+            </button>
+        </div>
+    </div>
 </div>
 
 <div id="settings-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
