@@ -91,6 +91,7 @@ function initMenu() {
     const menuItems = document.querySelectorAll('.menu-item');
     const pageTitle = document.getElementById('page-title');
     const topBarControls = document.querySelector('.top-bar-controls');
+    const recruitHeaderArea = document.getElementById('recruit-header-area'); // ★追加
 
     const pageIds = [
         'page-dashboard', 'page-goals', 'page-accounting', 
@@ -122,6 +123,11 @@ function initMenu() {
                 topBarControls.style.visibility = (target === 'dashboard') ? 'visible' : 'hidden';
             }
 
+            // ★採用ヘッダーエリア制御
+            if(recruitHeaderArea) {
+                recruitHeaderArea.style.display = (target === 'recruitment') ? 'flex' : 'none';
+            }
+
             // ターゲットページ表示
             const targetPage = document.getElementById('page-' + target);
             if (targetPage) targetPage.style.display = 'block';
@@ -142,14 +148,14 @@ function initMenu() {
 // 採用ページロジック
 // =================================================================
 function initRecruitmentFunctions() {
-    // 媒体編集 (ここがリンク集の編集も兼ねる)
+    // 媒体編集 (ヘッダーのリンク編集)
     const mediaModal = document.getElementById('recruitment-edit-modal');
     // グラフの編集ボタン
     document.getElementById('edit-recruitment-btn').addEventListener('click', () => {
         renderMediaEditList();
         mediaModal.style.display = 'flex';
     });
-    // ★追加: リンクカードの編集ボタンも同じモーダルを開く
+    // ★ヘッダーの編集ボタン
     document.getElementById('btn-edit-media-links').addEventListener('click', () => {
         renderMediaEditList();
         mediaModal.style.display = 'flex';
@@ -288,17 +294,19 @@ function renderJobList() {
 }
 
 function renderMediaLinks() {
-    const container = document.getElementById('recruit-media-links-card-body');
-    if(!container) return;
-    container.innerHTML = '';
+    // ヘッダー用コンテナ
+    const containerHeader = document.getElementById('recruit-media-links-header');
+    if(!containerHeader) return;
+    containerHeader.innerHTML = '';
+
     recruitmentData.forEach(media => {
         if(media.url) {
-            const html = `
-                <a href="${media.url}" target="_blank" style="text-decoration:none; background:${media.color}; color:white; padding:8px 15px; border-radius:20px; font-size:12px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1); opacity:0.9; transition:all 0.2s; display:inline-flex; align-items:center; gap:5px;">
+            const htmlHeader = `
+                <a href="${media.url}" target="_blank" style="text-decoration:none; background:${media.color}; color:white; padding:6px 12px; border-radius:15px; font-size:12px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1); opacity:0.9; transition:all 0.2s; white-space:nowrap; display:flex; align-items:center; gap:5px;">
                     ${media.label} <i class="fa-solid fa-external-link-alt" style="font-size:10px;"></i>
                 </a>
             `;
-            container.insertAdjacentHTML('beforeend', html);
+            containerHeader.insertAdjacentHTML('beforeend', htmlHeader);
         }
     });
 }
