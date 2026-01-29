@@ -42,7 +42,7 @@ window.startApp = function(token) {
     initUploadModal(); 
     initInputModal(); 
     initRecruitmentFunctions(); 
-    updateRecruitNews(); // 初回実行
+    updateRecruitNews(); 
     fetchData('getSales'); 
 };
 
@@ -92,6 +92,7 @@ function initMenu() {
     const pageTitle = document.getElementById('page-title');
     const topBarControls = document.querySelector('.top-bar-controls');
     const aiNewsHeader = document.getElementById('recruit-ai-news-header');
+    const mediaLinksHeader = document.getElementById('recruit-media-links-header'); // ★追加
 
     const pageIds = [
         'page-dashboard', 'page-goals', 'page-accounting', 
@@ -127,6 +128,11 @@ function initMenu() {
             if(aiNewsHeader) {
                 aiNewsHeader.style.display = (target === 'recruitment') ? 'flex' : 'none';
             }
+            
+            // ★追加: 媒体リンクパネル制御
+            if(mediaLinksHeader) {
+                mediaLinksHeader.style.display = (target === 'recruitment') ? 'flex' : 'none';
+            }
 
             // ターゲットページ表示
             const targetPage = document.getElementById('page-' + target);
@@ -148,7 +154,7 @@ function initMenu() {
 // 採用ページロジック
 // =================================================================
 function initRecruitmentFunctions() {
-    // 媒体データ
+    // 媒体編集
     const mediaModal = document.getElementById('recruitment-edit-modal');
     document.getElementById('edit-recruitment-btn').addEventListener('click', () => {
         renderMediaEditList();
@@ -219,14 +225,14 @@ function renderRecruitmentPage() {
     renderPipeline();
     renderJobList();
     renderMediaLinks();
+    updateRecruitNews();
 }
 
 function updateRecruitNews() {
     const newsData = [
         { text: "2026年診療報酬改定に向け、DHの有効求人倍率が高止まり傾向にあります。", url: "https://www.mhlw.go.jp/" },
         { text: "都市部では紹介会社経由の採用コストが平均50万円を超えています。", url: "https://www.google.com/search?q=歯科採用コスト" },
-        { text: "若手DHへのアピールには、Instagramのリール動画が効果的です。", url: "https://www.instagram.com/" },
-        { text: "オンライン面接の導入で、地方出身者の応募率が20%向上する事例が増えています。", url: "https://zoom.us/" }
+        { text: "若手DHへのアピールには、Instagramのリール動画が効果的です。", url: "https://www.instagram.com/" }
     ];
     const elemText = document.getElementById('recruitment-news-text');
     const elemLink = document.getElementById('recruitment-news-link');
@@ -246,6 +252,7 @@ function renderRecruitKPI() {
 
 function renderPipeline() {
     const container = document.getElementById('pipeline-container');
+    if(!container) return;
     container.innerHTML = '';
     recruitPipeline.forEach(stage => {
         let candidatesHtml = '';
@@ -267,6 +274,7 @@ function renderPipeline() {
 
 function renderJobList() {
     const container = document.getElementById('job-list-container');
+    if(!container) return;
     container.innerHTML = '';
     jobPostings.forEach(job => {
         const bg = job.status === '募集中' ? '#eff6ff' : '#f3f4f6';
@@ -285,17 +293,32 @@ function renderJobList() {
 }
 
 function renderMediaLinks() {
-    const container = document.getElementById('media-links-area');
-    container.innerHTML = '';
+    // 既存の下部エリア用
+    const containerBottom = document.getElementById('media-links-area');
+    // ★追加: ヘッダー用
+    const containerHeader = document.getElementById('recruit-media-links-header');
+    
+    if(containerBottom) containerBottom.innerHTML = '';
+    if(containerHeader) containerHeader.innerHTML = '';
+
     recruitmentData.forEach(media => {
         if(media.url) {
-            const html = `
+            // 下部用（既存のデザイン）
+            const htmlBottom = `
                 <a href="${media.url}" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:5px; background:white; padding:5px 10px; border:1px solid #eee; border-radius:20px; font-size:12px; color:#555; transition:all 0.2s;">
                     <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${media.color};"></span>
                     ${media.label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px; color:#999;"></i>
                 </a>
             `;
-            container.insertAdjacentHTML('beforeend', html);
+            if(containerBottom) containerBottom.insertAdjacentHTML('beforeend', htmlBottom);
+
+            // ★追加: ヘッダー用（コンパクトボタン）
+            const htmlHeader = `
+                <a href="${media.url}" target="_blank" style="text-decoration:none; background:${media.color}; color:white; padding:4px 10px; border-radius:15px; font-size:11px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1); opacity:0.9; transition:opacity 0.2s;">
+                    ${media.label} <i class="fa-solid fa-external-link-alt" style="font-size:10px;"></i>
+                </a>
+            `;
+            if(containerHeader) containerHeader.insertAdjacentHTML('beforeend', htmlHeader);
         }
     });
 }
@@ -324,7 +347,7 @@ function renderRecruitmentChart() {
     });
 }
 
-// 編集ヘルパー関数
+// 編集ヘルパー関数 (変更なし)
 function renderMediaEditList() {
     const listArea = document.getElementById('recruitment-list');
     listArea.innerHTML = '';
